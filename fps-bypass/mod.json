@@ -1,7 +1,7 @@
 {
 	"geode": "v0.4.2",
-	"version": "v1.0.0",
-	"id": "com.mat.fps-bypass",
+	"version": "v1.0.1",
+	"id": "mat.fps-bypass",
 	"name": "FPS Bypass",
 	"developer": "mat",
 	"description": "Allows for greater FPS values",
