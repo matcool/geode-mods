@@ -15,7 +15,7 @@ add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
 include(cmake/CPM.cmake)
 
-if (${GEODE_TARGET_PLATFORM} STREQUAL "Win32")
+if (WIN32)
 	add_subdirectory(fps-bypass)
 endif()
 add_subdirectory(scroll-zoom)
