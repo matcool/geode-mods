@@ -22,14 +22,14 @@ jobs:
           bin_folder: "windows"
           os: windows-2019
           extra_flags: '-T host=x64 -A win32'
-          out_paths:  './build/Release/*.dll'
+          out_paths:  './build/*/Release/*.dll'
           platform_suffix: 'win'
           
         - name: "macOS"
           bin_folder: "macos"
           os: macos-latest
           extra_flags: ""
-          out_paths: './build/*.dylib'
+          out_paths: './build/*/*.dylib'
           platform_suffix: 'mac'
           
     name: ${{ matrix.config.name }}
