@@ -9,8 +9,6 @@ on:
 env:
   GEODE_SDK: ${{ github.workspace }}/sdk
   GEODE_VER: v0.6.1
-  MOD_NAME: geode-mod-action
-  MOD_ID: mat.geode-mod-action
 
 jobs:
   build:
@@ -95,25 +93,24 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: build-windows
-          
+          path: built
+
       - uses: actions/download-artifact@v3
         with:
           name: build-macos
-          
+          path: built
+
       - name: Display structure of downloaded files
         run: ls -R
       
       - name: Merge
         shell: bash
-        run: |
-          mv $MOD_NAME.dll $MOD_ID.dll
-          mv lib$MOD_NAME.dylib $MOD_ID.dylib
-          ./geode.exe package new . --binary $MOD_ID.dll --binary $MOD_ID.dylib --output $MOD_NAME.geode
-         
+        run: merge.sh
+
       - uses: actions/upload-artifact@v3
         with:
           name: Build Output
-          path: "${{ env.MOD_NAME }}.geode"
+          path: "*.geode"
           
       - uses: geekyeggo/delete-artifact@v2
         with:
