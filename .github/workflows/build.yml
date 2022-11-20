@@ -8,7 +8,6 @@ on:
 
 env:
   GEODE_SDK: ${{ github.workspace }}/sdk
-  GEODE_VER: v0.6.1
 
 jobs:
   build:
@@ -109,7 +108,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: Build Output
+          name: mods
           path: "*.geode"
           
       - uses: geekyeggo/delete-artifact@v2
