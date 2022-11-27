@@ -29,6 +29,7 @@ class $modify(PlayLayer) {
 		if (lock_music) {
 			lock_music = false;
 			this->startMusic();
+			this->stopActionByTag(18);
 		}
 	}
 };
