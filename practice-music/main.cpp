@@ -4,8 +4,6 @@
 
 USE_GEODE_NAMESPACE();
 
-bool lock_music = false;
-
 class $modify(PlayLayer) {
 	void startMusic() {
 		bool is_practice = m_isPracticeMode;
@@ -23,21 +21,13 @@ class $modify(PlayLayer) {
 
 	void togglePracticeMode(bool toggle) {
 		if (!m_isPracticeMode && toggle) {
-			lock_music = true;
-		}
-		PlayLayer::togglePracticeMode(toggle);
-		if (lock_music) {
-			lock_music = false;
+			// recreate what togglePracticeMode does, but dont play practice mode song
+			m_isPracticeMode = toggle;
+			m_UILayer->toggleCheckpointsMenu(toggle);
 			this->startMusic();
 			this->stopActionByTag(18);
-		}
-	}
-};
-
-class $modify(GameSoundManager) {
-	void playBackgroundMusic(std::string name, bool a, bool b) {
-		if (!lock_music) {
-			GameSoundManager::playBackgroundMusic(name, a, b);
+		} else {
+			PlayLayer::togglePracticeMode(toggle);
 		}
 	}
 };
