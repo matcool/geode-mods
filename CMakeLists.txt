@@ -23,4 +23,7 @@ endif()
 add_subdirectory(scroll-zoom)
 add_subdirectory(physics-btns)
 add_subdirectory(practice-music)
-add_subdirectory(circle-tool)
+# TODO: find getSpriteButton addr on mac to remove this..
+if (WIN32)
+	add_subdirectory(circle-tool)
+endif()
