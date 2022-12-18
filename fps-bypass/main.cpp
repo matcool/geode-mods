@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp>
-#include <Geode/Modify.hpp>
+#include <Geode/modify/AppDelegate.hpp>
+#include <Geode/modify/PlayLayer.hpp>
 #include <chrono>
 
 USE_GEODE_NAMESPACE();
@@ -12,7 +13,7 @@ void update_fps() {
 			app->toggleVerticalSync(false);
 			GameManager::sharedState()->setGameVariable("0030", false);
 		}
-		const int value = Mod::get()->getSettingValue<int>("fps-value");
+		const int value = Mod::get()->getSettingValue<int64_t>("fps-value");
 		log::debug("updating fps to {}", value);
 		app->setAnimationInterval(1.0 / static_cast<double>(value));
 	}
@@ -26,11 +27,11 @@ class $modify(AppDelegate) {
 };
 
 $execute {
-	listenForSettingChanges<IntSetting>("fps-value", [](auto) {
+	listenForSettingChanges("fps-value", +[](int64_t) {
 		update_fps();
 	});
-	listenForSettingChanges<BoolSetting>("enabled", [](auto setting) {
-		if (setting->getValue()) {
+	listenForSettingChanges("enabled", +[](bool value) {
+		if (value) {
 			update_fps();
 		} else {
 			CCApplication::sharedApplication()->setAnimationInterval(1.0 / 60.0);
