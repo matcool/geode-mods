@@ -275,8 +275,8 @@ class $modify(SetupPulsePopup) {
 			widget->update_labels(true, true);
 	}
 
-	void updatePulseMode() {
-		SetupPulsePopup::updatePulseMode();
+	void onSelectPulseMode(CCObject* sender) {
+		SetupPulsePopup::onSelectPulseMode(sender);
 		if (auto widget = m_fields->m_widget)
 			widget->update_labels(true, true);
 	}
