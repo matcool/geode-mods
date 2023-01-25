@@ -13,8 +13,6 @@ endif()
 set(GEODE_LINK_NIGHTLY ON)
 add_subdirectory($ENV{GEODE_SDK} $ENV{GEODE_SDK}/build)
 
-include(cmake/CPM.cmake)
-
 add_subdirectory(nodes)
 
 if (WIN32)
@@ -25,3 +23,4 @@ add_subdirectory(physics-btns)
 add_subdirectory(practice-music)
 add_subdirectory(circle-tool)
 add_subdirectory(rgb-color-input)
+add_subdirectory(run-info)

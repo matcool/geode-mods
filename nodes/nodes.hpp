@@ -99,8 +99,13 @@ public:
 	#undef GEN_FACTORY_FUNC
 
 	template <class Func>
-	auto& with(Func& function) {
+	auto& with(Func&& function) {
 		function(end());
+		return *this;
+	}
+
+	auto& addTo(cocos2d::CCNode* node) {
+		node->addChild(end());
 		return *this;
 	}
 };
