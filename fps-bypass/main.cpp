@@ -1,6 +1,8 @@
-#include <Geode/Geode.hpp>
+#include <Geode/Bindings.hpp>
 #include <Geode/modify/AppDelegate.hpp>
 #include <Geode/modify/PlayLayer.hpp>
+#include <Geode/loader/SettingEvent.hpp>
+#include <Geode/loader/ModJsonTest.hpp>
 #include <chrono>
 
 USE_GEODE_NAMESPACE();
