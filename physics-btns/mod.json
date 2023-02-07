@@ -1,8 +1,8 @@
 {
-	"geode": "v0.5.0",
+	"geode": "v1.0.0",
 	"version": "v1.0.0",
 	"id": "mat.physics-btns",
 	"name": "awesome",
 	"developer": "mat",
-	"description": "zoom in the editor.."
+	"description": "turns all buttons into rigid bodies!"
 }

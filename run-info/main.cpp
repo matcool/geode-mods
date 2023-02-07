@@ -107,7 +107,7 @@ class $modify(PlayLayer) {
 			for (auto* child : children) {
 				using namespace std::literals::string_view_literals;
 				if (auto* label = typeinfo_cast<CCLabelBMFont*>(child); label && label->getString() == "Testmode"sv) {
-					label->removeFromParentAndCleanup(true);
+					label->setVisible(false);
 					break;
 				}
 			}
