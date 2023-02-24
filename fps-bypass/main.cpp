@@ -11,13 +11,13 @@ void update_fps() {
 	if (Mod::get()->getSettingValue<bool>("enabled")) {
 		auto* app = CCApplication::sharedApplication();
 		if (app->getVerticalSyncEnabled()) {
-			log::debug("toggled vsync");
 			app->toggleVerticalSync(false);
 			GameManager::sharedState()->setGameVariable("0030", false);
 		}
 		const int value = Mod::get()->getSettingValue<int64_t>("fps-value");
-		log::debug("updating fps to {}", value);
 		app->setAnimationInterval(1.0 / static_cast<double>(value));
+	} else {
+		CCApplication::sharedApplication()->setAnimationInterval(1.0 / 60.0);
 	}
 }
 
@@ -32,13 +32,17 @@ $execute {
 	listenForSettingChanges("fps-value", +[](int64_t) {
 		update_fps();
 	});
-	listenForSettingChanges("enabled", +[](bool value) {
-		if (value) {
-			update_fps();
-		} else {
-			CCApplication::sharedApplication()->setAnimationInterval(1.0 / 60.0);
-		}
+	listenForSettingChanges("enabled", +[](bool) {
+		update_fps();
 	});
+}
+
+$on_mod(Enabled) {
+	update_fps();
+}
+
+$on_mod(Disabled) {
+	CCApplication::sharedApplication()->setAnimationInterval(1.0 / 60.0);
 }
 
 // ui
