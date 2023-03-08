@@ -54,7 +54,7 @@ jobs:
         mkdir bin
         mkdir bin/nightly
         cd bin/nightly
-        curl -L https://github.com/geode-sdk/geode/releases/download/Nightly/geode-nightly-${{ matrix.config.platform_suffix }}.zip -o geode-sdk.zip
+        curl -L https://github.com/geode-sdk/geode/releases/download/nightly/geode-nightly-${{ matrix.config.platform_suffix }}.zip -o geode-sdk.zip
         tar -xf geode-sdk.zip
 
     - name: Configure CMake
@@ -86,7 +86,7 @@ jobs:
       
       - name: Download and Unzip CLI
         run: |
-          curl -L https://github.com/geode-sdk/cli/releases/download/v1.1.1/geode-cli-v1.1.1-win.zip -o geode-cli.zip
+          curl -L https://github.com/geode-sdk/cli/releases/download/v2.0.0/geode-cli-v2.0.0-win.zip -o geode-cli.zip
           tar -xf geode-cli.zip
 
       - uses: actions/download-artifact@v3
