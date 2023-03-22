@@ -4,5 +4,17 @@
 	"id": "mat.run-info",
 	"name": "Run Info",
 	"developer": "mat",
-	"description": "you know it"
+	"description": "you know it",
+	"settings": {
+		"position-top": {
+			"name": "Top",
+			"type": "bool",
+			"default": true
+		},
+		"position-left": {
+			"name": "Left",
+			"type": "bool",
+			"default": true
+		}
+	}
 }

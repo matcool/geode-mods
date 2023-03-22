@@ -4,7 +4,7 @@
 #include <fmt/core.h>
 #include <string_view>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 enum class Position {
 	Left,
@@ -122,6 +122,14 @@ class $modify(PlayLayer) {
 			.addTo(this)
 			.end();
 
+		this->update_labels();
+
+		// FIXME: switch to an enum type of setting.. whenever thats available (or make one myself)
+		this->update_position(
+			Mod::get()->getSettingValue<bool>("position-top"),
+			Mod::get()->getSettingValue<bool>("position-left")
+		);
+
 		return true;
 	}
 
@@ -150,12 +158,18 @@ class $modify(PlayLayer) {
 	void resetLevel() {
 		PlayLayer::resetLevel();
 		m_fields->m_initial_x = m_player1->getPosition().x;
-		if (m_fields->m_widget)
-			m_fields->m_widget->update_labels(this, m_fields->m_initial_x);
+		this->update_labels();
 	}
 
 	void togglePracticeMode(bool toggle) {
 		PlayLayer::togglePracticeMode(toggle);
-		m_fields->m_widget->update_labels(this, m_fields->m_initial_x);
+		this->update_labels();
+	}
+
+	void update_labels() {
+		if (m_fields->m_widget) {
+			m_fields->m_widget->update_labels(this, m_fields->m_initial_x);
+			m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
+		}
 	}
 };

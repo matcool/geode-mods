@@ -95,6 +95,7 @@ public:
 	GEN_FACTORY_FUNC(setColor)
 	GEN_FACTORY_FUNC(limitLabelWidth)
 	GEN_FACTORY_FUNC(setUserObject)
+	GEN_FACTORY_FUNC(setVisible)
 
 	#undef GEN_FACTORY_FUNC
 
