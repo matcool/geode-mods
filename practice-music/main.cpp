@@ -2,7 +2,7 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GameSoundManager.hpp>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 class $modify(PlayLayer) {
 	void startMusic() {
@@ -29,5 +29,9 @@ class $modify(PlayLayer) {
 		} else {
 			PlayLayer::togglePracticeMode(toggle);
 		}
+	}
+
+	static void onModify(auto& self) {
+		(void) self.setHookPriority("PlayLayer::togglePracticeMode", 9999);
 	}
 };
