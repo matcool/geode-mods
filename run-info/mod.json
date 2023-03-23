@@ -4,7 +4,7 @@
 	"id": "mat.run-info",
 	"name": "Run Info",
 	"developer": "mat",
-	"description": "you know it",
+	"description": "Shows info about current run",
 	"settings": {
 		"position-top": {
 			"name": "Top",
