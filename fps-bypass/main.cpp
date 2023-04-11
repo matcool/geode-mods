@@ -5,7 +5,7 @@
 #include <Geode/loader/ModJsonTest.hpp>
 #include <chrono>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 void update_fps() {
 	if (Mod::get()->getSettingValue<bool>("enabled")) {

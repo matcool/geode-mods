@@ -2,7 +2,7 @@
 #include <Geode/modify/ColorSelectPopup.hpp>
 #include <Geode/modify/SetupPulsePopup.hpp>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 inline std::string color_to_hex(ccColor3B color) {
 	static constexpr auto digits = "0123456789ABCDEF";

@@ -2,7 +2,7 @@
 #include <Geode/Modify.hpp>
 #include <numbers>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 class $modify(EditorUI) {
 	void scrollWheel(float y, float x) {

@@ -5,7 +5,7 @@
 #include <memory>
 #include <fmt/core.h>
 
-USE_GEODE_NAMESPACE();
+using namespace geode::prelude;
 
 static constexpr float ratio = 64.f;
 
