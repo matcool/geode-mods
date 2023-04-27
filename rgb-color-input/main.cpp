@@ -236,8 +236,10 @@ class $modify(ColorSelectPopup) {
 
 	void updateCopyColorTextInputLabel() {
 		ColorSelectPopup::updateCopyColorTextInputLabel();
-		if (auto widget = m_fields->m_widget)
+		if (auto widget = m_fields->m_widget) {
+			widget->setVisible(!m_copyColor);
 			widget->update_labels(true, true);
+		}
 	}
 };
 
@@ -277,7 +279,9 @@ class $modify(SetupPulsePopup) {
 
 	void onSelectPulseMode(CCObject* sender) {
 		SetupPulsePopup::onSelectPulseMode(sender);
-		if (auto widget = m_fields->m_widget)
+		if (auto widget = m_fields->m_widget) {
+			widget->setVisible(m_pulseMode == 0);
 			widget->update_labels(true, true);
+		}
 	}
 };
