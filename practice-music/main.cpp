@@ -23,7 +23,9 @@ class $modify(PlayLayer) {
 		if (!m_isPracticeMode && toggle) {
 			// recreate what togglePracticeMode does, but dont play practice mode song
 			m_isPracticeMode = toggle;
-			m_UILayer->toggleCheckpointsMenu(toggle);
+			if (!GameManager::get()->getGameVariable("0071")) {
+				m_UILayer->toggleCheckpointsMenu(toggle);
+			}
 			this->startMusic();
 			this->stopActionByTag(18);
 		} else {
