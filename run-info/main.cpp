@@ -13,9 +13,11 @@ enum class Position {
 
 class RunInfoWidget : public CCNode {
 public:
-	CCLabelBMFont* m_statusLabel = nullptr;
-	CCLabelBMFont* m_infoLabel = nullptr;
-	CCSprite* m_iconSprite = nullptr;
+	CCLabelBMFont* m_status_label = nullptr;
+	CCLabelBMFont* m_info_label = nullptr;
+	CCSprite* m_icon_sprite = nullptr;
+	Position m_last_pos;
+	bool m_was_practice = true;
 
 	static RunInfoWidget* create(Position pos) {
 		auto* ret = new (std::nothrow) RunInfoWidget;
@@ -30,66 +32,80 @@ public:
 
 	bool init(Position pos) {
 		if (!CCNode::init()) return false;
-		
-		m_statusLabel = make_factory(CCLabelBMFont::create("Practice", "bigFont.fnt"))
+		m_status_label = make_factory(CCLabelBMFont::create("Practice", "bigFont.fnt"))
 			.setOpacity(64)
 			.setScale(0.5f)
 			.addTo(this)
 			.end();
 
-		m_infoLabel = make_factory(CCLabelBMFont::create("From 0%", "bigFont.fnt"))
+		m_info_label = make_factory(CCLabelBMFont::create("From 0%", "bigFont.fnt"))
 			.setOpacity(64)
 			.setScale(0.4f)
 			.addTo(this)
 			.end();
 
-		m_iconSprite = make_factory(CCSprite::createWithSpriteFrameName("checkpoint_01_001.png"))
-			.setOpacity(64)
-			.addTo(this)
-			.with([&](auto* sprite) {
-				sprite->setScale(m_statusLabel->getScaledContentSize().height / sprite->getContentSize().height);
-			})
-			.end();
+		this->reset_icon("checkpoint_01_001.png");
 
 		this->update_position(pos);
 
-		float height = m_statusLabel->getScaledContentSize().height + m_infoLabel->getScaledContentSize().height;
-		float width = m_statusLabel->getScaledContentSize().width;
+		float height = m_status_label->getScaledContentSize().height + m_info_label->getScaledContentSize().height;
+		float width = m_status_label->getScaledContentSize().width;
 		this->setContentSize({width, height});
 
 		return true;
 	}
 
+	void reset_icon(const char* str) {
+		if (m_icon_sprite) m_icon_sprite->removeFromParent();
+		m_icon_sprite = make_factory(CCSprite::createWithSpriteFrameName(str))
+			.setOpacity(64)
+			.addTo(this)
+			.with([&](auto* sprite) {
+				sprite->setScale(m_status_label->getScaledContentSize().height / sprite->getContentSize().height);
+			})
+			.end();
+	}
+
 	void update_position(Position pos) {
-		float y = m_infoLabel->getScaledContentSize().height;
-		m_iconSprite->setPositionY(y - 1.f);
-		m_statusLabel->setPositionY(y);
-		m_infoLabel->setPositionY(0.f);
+		float y = m_info_label->getScaledContentSize().height;
+		m_icon_sprite->setPositionY(y - 1.f);
+		m_status_label->setPositionY(y);
+		m_info_label->setPositionY(0.f);
 
 		const bool left = pos == Position::Left;
 		const float h_flip = left ? 1.f : -1.f;
 		const auto anchor = ccp(left ? 0.f : 1.f, 0.f);
 		
-		m_iconSprite->setAnchorPoint(anchor);
-		m_statusLabel->setAnchorPoint(anchor);
-		m_infoLabel->setAnchorPoint(anchor);
+		m_icon_sprite->setAnchorPoint(anchor);
+		m_status_label->setAnchorPoint(anchor);
+		m_info_label->setAnchorPoint(anchor);
 
 		float x = 5.f;
 
-		m_iconSprite->setPositionX(h_flip * x);
-		m_statusLabel->setPositionX(h_flip * (x + m_iconSprite->getScaledContentSize().width + 2.f));
-		m_infoLabel->setPositionX(h_flip * x);
+		m_icon_sprite->setPositionX(h_flip * x);
+		m_status_label->setPositionX(h_flip * (x + m_icon_sprite->getScaledContentSize().width + 2.f));
+		m_info_label->setPositionX(h_flip * x);
+
+		m_last_pos = pos;
 	}
 
 	void update_labels(PlayLayer* layer, float x) {
 		if (layer->m_isPracticeMode) {
-			m_statusLabel->setString("Practice");
+			m_status_label->setString("Practice");
+			if (!m_was_practice)
+				this->reset_icon("checkpoint_01_001.png");
+			m_was_practice = true;
 		} else if (layer->m_isTestMode) {
-			m_statusLabel->setString("Testmode");
+			m_status_label->setString("Testmode");
+			if (m_was_practice)
+				this->reset_icon("edit_eStartPosBtn_001.png");
+			m_was_practice = false;
 		}
 
 		int percent = static_cast<int>(x / layer->m_levelLength * 100.f);
-		m_infoLabel->setString(fmt::format("From {}%", percent).c_str());
+		m_info_label->setString(fmt::format("From {}%", percent).c_str());
+
+		this->update_position(m_last_pos);
 	}
 };
 
@@ -122,13 +138,13 @@ class $modify(PlayLayer) {
 			.addTo(this)
 			.end();
 
-		this->update_labels();
-
 		// FIXME: switch to an enum type of setting.. whenever thats available (or make one myself)
 		this->update_position(
 			Mod::get()->getSettingValue<bool>("position-top"),
 			Mod::get()->getSettingValue<bool>("position-left")
 		);
+
+		this->update_labels();
 
 		return true;
 	}
