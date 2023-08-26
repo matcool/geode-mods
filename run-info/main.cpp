@@ -67,7 +67,13 @@ public:
 	}
 
 	void update_position(Position pos) {
-		float y = m_info_label->getScaledContentSize().height;
+		bool show_icon = Mod::get()->getSettingValue<bool>("show-icon");
+		if (!Mod::get()->getSettingValue<bool>("use-start-pos") && !m_was_practice)
+			show_icon = false;
+		const bool show_status = Mod::get()->getSettingValue<bool>("show-mode");
+		const bool show_info = Mod::get()->getSettingValue<bool>("show-from");
+
+		const float y = show_info ? m_info_label->getScaledContentSize().height : 0.f;
 		m_icon_sprite->setPositionY(y - 1.f);
 		m_status_label->setPositionY(y);
 		m_info_label->setPositionY(0.f);
@@ -83,8 +89,22 @@ public:
 		float x = 5.f;
 
 		m_icon_sprite->setPositionX(h_flip * x);
-		m_status_label->setPositionX(h_flip * (x + m_icon_sprite->getScaledContentSize().width + 2.f));
+		if (show_icon)
+			m_status_label->setPositionX(h_flip * (x + m_icon_sprite->getScaledContentSize().width + 2.f));
+		else
+			m_status_label->setPositionX(h_flip * x);
 		m_info_label->setPositionX(h_flip * x);
+
+		m_icon_sprite->setVisible(show_icon);
+		m_status_label->setVisible(show_status);
+		m_info_label->setVisible(show_info);
+
+		float height = 0.f;
+		if (show_info)
+			height += m_info_label->getScaledContentSize().height;		
+		if (show_status || show_icon)
+			height += m_status_label->getScaledContentSize().height;
+		this->setContentSize({this->getContentSize().width, height});
 
 		m_last_pos = pos;
 	}
@@ -104,8 +124,6 @@ public:
 
 		int percent = static_cast<int>(x / layer->m_levelLength * 100.f);
 		m_info_label->setString(fmt::format("From {}%", percent).c_str());
-
-		this->update_position(m_last_pos);
 	}
 };
 
@@ -138,18 +156,23 @@ class $modify(PlayLayer) {
 			.addTo(this)
 			.end();
 
+		this->update_labels();
+		this->update_position();
+	
+		return true;
+	}
+
+	void update_position() {
 		// FIXME: switch to an enum type of setting.. whenever thats available (or make one myself)
 		this->update_position(
 			Mod::get()->getSettingValue<bool>("position-top"),
 			Mod::get()->getSettingValue<bool>("position-left")
 		);
-
-		this->update_labels();
-
-		return true;
 	}
 
 	void update_position(bool top, bool left) {
+		if (!m_fields->m_widget) return;
+
 		auto* widget = m_fields->m_widget;
 
 		widget->update_position(left ? Position::Left : Position::Right);
@@ -175,17 +198,18 @@ class $modify(PlayLayer) {
 		PlayLayer::resetLevel();
 		m_fields->m_initial_x = m_player1->getPosition().x;
 		this->update_labels();
+		this->update_position();
 	}
 
 	void togglePracticeMode(bool toggle) {
 		PlayLayer::togglePracticeMode(toggle);
 		this->update_labels();
+		this->update_position();
 	}
 
 	void update_labels() {
-		if (m_fields->m_widget) {
-			m_fields->m_widget->update_labels(this, m_fields->m_initial_x);
-			m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
-		}
+		if (!m_fields->m_widget) return;
+		m_fields->m_widget->update_labels(this, m_fields->m_initial_x);
+		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
 	}
 };
