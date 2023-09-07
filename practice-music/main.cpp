@@ -4,8 +4,14 @@
 
 using namespace geode::prelude;
 
+bool is_enabled() {
+	return Mod::get()->getSettingValue<bool>("enabled");
+}
+
 class $modify(PlayLayer) {
 	void startMusic() {
+		if (!is_enabled())
+			return PlayLayer::startMusic();
 		bool is_practice = m_isPracticeMode;
 		m_isPracticeMode = false;
 		PlayLayer::startMusic();
@@ -13,14 +19,14 @@ class $modify(PlayLayer) {
 	}
 
 	void destroyPlayer(PlayerObject* player, GameObject* obj) {
-		if (m_isPracticeMode && obj != m_antiCheatObject) {
+		if (is_enabled() && m_isPracticeMode && obj != m_antiCheatObject) {
 			GameSoundManager::sharedManager()->stopBackgroundMusic();
 		}
 		PlayLayer::destroyPlayer(player, obj);
 	}
 
 	void togglePracticeMode(bool toggle) {
-		if (!m_isPracticeMode && toggle) {
+		if (is_enabled() && !m_isPracticeMode && toggle) {
 			// recreate what togglePracticeMode does, but dont play practice mode song
 			m_isPracticeMode = toggle;
 			if (!GameManager::get()->getGameVariable("0071")) {
