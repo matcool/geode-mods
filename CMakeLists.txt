@@ -23,4 +23,7 @@ add_subdirectory(practice-music)
 add_subdirectory(circle-tool)
 add_subdirectory(rgb-color-input)
 add_subdirectory(run-info)
-add_subdirectory(song-search)
+if (WIN32)
+	# TODO: find some fmod funcs
+	add_subdirectory(song-search)
+endif()

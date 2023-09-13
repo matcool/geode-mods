@@ -93,10 +93,8 @@ public:
         CCObject* ob;
         CCARRAY_FOREACH(songs_, ob) {
             auto song = typeinfo_cast<SongInfoObject*>(ob);
-            std::stringstream builder;
-			// TODO: fix this in geode
-            builder << song->m_songName.operator std::string_view() << " " << song->m_artistName.operator std::string_view();
-            m_downloaded_songs.push_back({builder.str(), song});
+			std::string data = std::string(song->m_songName) + " " + std::string(song->m_artistName);
+            m_downloaded_songs.push_back({data, song});
         }
 
         m_total_songs_label = CCLabelBMFont::create("", "goldFont.fnt");
