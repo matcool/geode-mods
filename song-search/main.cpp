@@ -133,13 +133,7 @@ public:
     }
 
     void check_mouse_movement(float) {
-        const auto director = CCDirector::sharedDirector();
-        const auto win_size = director->getWinSize();
-        auto gl = director->getOpenGLView();
-        const auto frame_size = gl->getFrameSize();
-        auto mouse_pos = gl->getMousePosition();
-        mouse_pos.x = (mouse_pos.x / frame_size.width) * win_size.width;
-        mouse_pos.y = (1.f - mouse_pos.y / frame_size.height) * win_size.height;
+		const auto mouse_pos = geode::cocos::getMousePos();
         if (mouse_pos.y != m_prev_mouse_pos.y) {
         // if (mouse_pos.y < clip_height) {
             m_prev_mouse_pos = mouse_pos;
