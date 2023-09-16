@@ -71,7 +71,7 @@ void FloatInputNode::textChanged(CCTextInputNode*) {
 void FloatInputNode::set_value(float value) {
 	// TODO: not hardcode this
 	std::array<char, 10> arr;
-#ifdef GEODE_IS_MACOS
+#ifndef __cpp_lib_to_chars
 	// macos std::to_chars does not support floats at all, awesome
 	const auto str = fmt::format("{}", value);
 	if (str.size() >= 10) {
@@ -93,7 +93,7 @@ void FloatInputNode::set_value(float value) {
 
 std::optional<float> FloatInputNode::get_value() {
 	const auto str = input_node->getString();
-#ifdef GEODE_IS_MACOS
+#ifndef __cpp_lib_to_chars
 	try {
 		return std::stof(str);
 	} catch (const std::invalid_argument&) {
