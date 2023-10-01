@@ -133,7 +133,8 @@ public:
     }
 
     void check_mouse_movement(float) {
-		const auto mouse_pos = geode::cocos::getMousePos();
+#ifdef GEODE_IS_DESKTOP
+        const auto mouse_pos = geode::cocos::getMousePos();
         if (mouse_pos.y != m_prev_mouse_pos.y) {
         // if (mouse_pos.y < clip_height) {
             m_prev_mouse_pos = mouse_pos;
@@ -141,6 +142,7 @@ public:
         }
 
         m_prev_mouse_pos = mouse_pos;
+#endif
     }
 
     void move_delete_btn() {
@@ -254,15 +256,14 @@ public:
 
 class SimpleSongWidget : public CCNode {
 protected:
-    SongInfoObject* m_song;
-    CCLabelBMFont* m_name_label;
-    CCLabelBMFont* m_artist_label;
-    CCMenuItemSpriteExtra* m_play_button;
-    CustomSongSearchLayer* m_parent;
+    SongInfoObject* m_song = nullptr;
+    CCLabelBMFont* m_name_label = nullptr;
+    CCLabelBMFont* m_artist_label = nullptr;
+    CCMenuItemSpriteExtra* m_play_button = nullptr;
+    CustomSongSearchLayer* m_parent = nullptr;
 public:
     bool init(CustomSongSearchLayer* s) {
         m_parent = s;
-        m_song = nullptr;
         constexpr float width = 350.f;
         constexpr float height = widget_height;
         auto bg = extension::CCScale9Sprite::create("GJ_square01.png");
@@ -311,10 +312,12 @@ public:
     }
 
     void update_play_btn() {
-        auto fmod = FMODAudioEngine::sharedEngine();
-        auto song_path = MusicDownloadManager::sharedState()->pathForSong(m_song->m_songID);
-        const auto sprite = fmod->isBackgroundMusicPlaying(song_path) ? "GJ_stopMusicBtn_001.png" : "GJ_playMusicBtn_001.png";
-        m_play_button->setNormalImage(CCSprite::createWithSpriteFrameName(sprite));
+		if (m_song) {
+			auto fmod = FMODAudioEngine::sharedEngine();
+			auto song_path = MusicDownloadManager::sharedState()->pathForSong(m_song->m_songID);
+			const auto sprite = fmod->isBackgroundMusicPlaying(song_path) ? "GJ_stopMusicBtn_001.png" : "GJ_playMusicBtn_001.png";
+			m_play_button->setNormalImage(CCSprite::createWithSpriteFrameName(sprite));
+		}
     }
 
     void on_select(CCObject* obj) {
