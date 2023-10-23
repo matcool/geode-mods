@@ -4,5 +4,6 @@
 	"id": "mat.ffmt",
 	"name": "Fast Format",
 	"developer": "mat",
-	"description": "might be fast, who knows"
+	"description": "might be fast, who knows",
+	"tags": ["Optimization"]
 }
