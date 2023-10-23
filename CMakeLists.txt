@@ -16,6 +16,7 @@ add_subdirectory(nodes)
 
 if (WIN32)
 	add_subdirectory(fps-bypass)
+	add_subdirectory(fast-format)
 endif()
 add_subdirectory(scroll-zoom)
 # add_subdirectory(physics-btns)
