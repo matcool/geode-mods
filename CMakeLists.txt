@@ -14,7 +14,7 @@ endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
-# add_subdirectory(nodes)
+add_subdirectory(nodes)
 
 if (WIN32)
 	# add_subdirectory(fps-bypass)
@@ -25,7 +25,7 @@ endif()
 # add_subdirectory(scroll-zoom)
 # # add_subdirectory(physics-btns)
 # add_subdirectory(practice-music)
-# add_subdirectory(circle-tool)
+add_subdirectory(circle-tool)
 # add_subdirectory(rgb-color-input)
 # add_subdirectory(run-info)
 # add_subdirectory(song-search)

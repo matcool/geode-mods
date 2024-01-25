@@ -103,7 +103,7 @@ std::optional<float> FloatInputNode::get_value() {
 	}
 #else
 	float value = 0.f;
-	const auto result = std::from_chars(str, str + std::strlen(str), value);
+	const auto result = std::from_chars(str.data(), str.data() + str.size(), value);
 	if (result.ec == std::errc::invalid_argument)
 		return {};
 	return value;

@@ -30,7 +30,8 @@ public:
 		this->m_noElasticity = true;
 
 		auto* director = CCDirector::sharedDirector();
-		director->getTouchDispatcher()->incrementForcePrio(69);
+		geode::cocos::handleTouchPriority(this);
+		// director->getTouchDispatcher()->incrementForcePrio(69);
 		this->registerWithTouchDispatcher();
 
 		auto layer = CCLayer::create();
@@ -209,7 +210,7 @@ public:
 			if (m_fat != 0.f) {
 				float off_y = calc(angle) - off_acc;
 
-				for (auto obj : CCArrayExt<GameObject>(selected)) {
+				for (auto obj : CCArrayExt<GameObject*>(selected)) {
 					editor_ui->moveObject(obj, {0, off_y});
 				}
 
@@ -251,13 +252,16 @@ float CircleToolPopup::m_fat = 0.f;
 
 class $modify(MyEditorUI, EditorUI) {
 	void on_circle_tool(CCObject*) {
-		if (this->getSelectedObjects()->count())
+		if (this->getSelectedObjects()->count()) {
 			CircleToolPopup::create()->show();
+		} else {
+			FLAlertLayer::create("Info", "You must select some objects to use circle tool", "OK")->show();
+		}
 	}
 
 	void createMoveMenu() {
 		EditorUI::createMoveMenu();
-		auto* btn = this->getSpriteButton("player_ball_43_2_001.png", menu_selector(MyEditorUI::on_circle_tool), nullptr, 0.9f);
+		auto* btn = this->getSpriteButton("button.png"_spr, menu_selector(MyEditorUI::on_circle_tool), nullptr, 0.9f);
 		m_editButtonBar->m_buttonArray->addObject(btn);
 		auto rows = GameManager::sharedState()->getIntGameVariable("0049");
 		auto cols = GameManager::sharedState()->getIntGameVariable("0050");
