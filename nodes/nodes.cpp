@@ -91,16 +91,17 @@ void FloatInputNode::set_value(float value) {
 #endif
 }
 
-std::optional<float> FloatInputNode::get_value() {
-	const auto str = input_node->getString();
+std::optional<float> parse_float(const std::string_view str) {
 #ifndef __cpp_lib_to_chars
-	try {
-		return std::stof(str);
-	} catch (const std::invalid_argument&) {
-		return {};
-	} catch (const std::out_of_range&) {
+	// amazing i know, do this to avoid exceptions
+	std::stringstream stream;
+	stream << str;
+	stream.imbue(std::locale("C"));
+	float value;
+	if (!(stream >> value)) {
 		return {};
 	}
+	return value;
 #else
 	float value = 0.f;
 	const auto result = std::from_chars(str.data(), str.data() + str.size(), value);
@@ -108,4 +109,9 @@ std::optional<float> FloatInputNode::get_value() {
 		return {};
 	return value;
 #endif
+}
+
+std::optional<float> FloatInputNode::get_value() {
+	const auto str = input_node->getString();
+	return parse_float(str);
 }
