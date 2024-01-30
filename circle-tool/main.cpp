@@ -24,7 +24,7 @@ public:
 		return node;
 	}
 
-	bool init() {
+	bool init() override {
 		if (!this->initWithColor({0, 0, 0, 75})) return false;
 
 		this->m_noElasticity = true;
