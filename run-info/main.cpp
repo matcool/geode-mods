@@ -109,7 +109,7 @@ public:
 		m_last_pos = pos;
 	}
 
-	void update_labels(PlayLayer* layer, float x) {
+	void update_labels(PlayLayer* layer, int percent) {
 		if (layer->m_isPracticeMode) {
 			m_status_label->setString("Practice");
 			if (!m_was_practice)
@@ -122,7 +122,6 @@ public:
 			m_was_practice = false;
 		}
 
-		int percent = static_cast<int>(x / layer->m_levelLength * 100.f);
 		m_info_label->setString(fmt::format("From {}%", percent).c_str());
 	}
 };
@@ -130,10 +129,12 @@ public:
 
 class $modify(PlayLayer) {
 	RunInfoWidget* m_widget = nullptr;
-	float m_initial_x;
+	// TODO: once we recreate getCurrentPercent maybe switch to float,
+	// and add option for decimals
+	int m_initial_percent = 0;
 
-	bool init(GJGameLevel* level) {
-		if (!PlayLayer::init(level)) return false;
+	bool init(GJGameLevel* level, bool unk1, bool unk2) {
+		if (!PlayLayer::init(level, unk1, unk2)) return false;
 
 		// removes the testmode label gd creates
 		if (this->getChildrenCount()) {
@@ -196,7 +197,7 @@ class $modify(PlayLayer) {
 
 	void resetLevel() {
 		PlayLayer::resetLevel();
-		m_fields->m_initial_x = m_player1->getPosition().x;
+		m_fields->m_initial_percent = this->getCurrentPercentInt();
 		this->update_labels();
 		this->update_position();
 	}
@@ -209,7 +210,7 @@ class $modify(PlayLayer) {
 
 	void update_labels() {
 		if (!m_fields->m_widget) return;
-		m_fields->m_widget->update_labels(this, m_fields->m_initial_x);
+		m_fields->m_widget->update_labels(this, m_fields->m_initial_percent);
 		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
 	}
 };
