@@ -1,5 +1,5 @@
 {
-	"geode": "2.0.0",
+	"geode": "2.0.0-beta.19",
 	"gd": {
 		"win": "2.204",
 		"android": "2.205"
@@ -9,6 +9,7 @@
 	"name": "Circle Tool",
 	"developer": "mat",
 	"description": "An editor tool to duplicate and rotate objects.",
+	"tags": ["Editor"],
 	"resources": {
 		"sprites": [
 			"res/screenshot.png"
