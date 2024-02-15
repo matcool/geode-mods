@@ -30,5 +30,6 @@
 			"name": "Scroll speed",
 			"description": "Speed for how fast the editor pans when you scroll the mouse."
 		}
-	}
+	},
+	"repository": "https://github.com/matcool/geode-mods"
 }

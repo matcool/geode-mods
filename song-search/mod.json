@@ -4,5 +4,6 @@
 	"id": "mat.song-search",
 	"name": "Song Search",
 	"developer": "mat",
-	"description": "Easily search through your saved songs."
+	"description": "Easily search through your saved songs.",
+	"repository": "https://github.com/matcool/geode-mods"
 }

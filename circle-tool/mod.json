@@ -19,5 +19,6 @@
 				"res/button.png"
 			]
 		}
-	}
+	},
+	"repository": "https://github.com/matcool/geode-mods"
 }
