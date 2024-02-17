@@ -24,7 +24,7 @@ if (WIN32)
 	# no android yet, maybe i could add pinch to zoom or smth
 	add_subdirectory(scroll-zoom)
 endif()
-# # add_subdirectory(physics-btns)
+add_subdirectory(physics-btns)
 add_subdirectory(circle-tool)
 add_subdirectory(reference-image)
 add_subdirectory(run-info)

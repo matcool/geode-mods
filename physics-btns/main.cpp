@@ -94,6 +94,9 @@ class $modify(MyDirector, CCDirector) {
 	}
 
 	void recurse_nodes(CCNode* node) {
+		if (typeinfo_cast<GJBaseGameLayer*>(node)) return;
+		if (std::string_view(typeid(*node).name()).find("ModListLayer") != -1) return;
+
 		// log::info("recursing through {}", node);
 		if (!node->getChildren() || !node->isVisible()) return;
 		CCArrayExt<CCNode*> arr(node->getChildren());
