@@ -3,11 +3,11 @@
 	"gd": {
 		"win": "2.204"
 	},
-	"version": "v1.0.0",
+	"version": "v1.0.1",
 	"id": "mat.max-window",
-	"name": "Maximize GD Window and also Free Window Resize",
+	"name": "Window Resize",
 	"developer": "mat",
-	"description": "",
+	"description": "Allows you to freely resize the window, and to maximize the GD window.",
 	"repository": "https://github.com/matcool/geode-mods",
 	"settings": {
 		"free-resize": {
