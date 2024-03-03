@@ -8,16 +8,16 @@
 	"description": "Makes the game render at native refresh rate, helping perfomance.",
 	"repository": "https://github.com/matcool/geode-mods",
 	"settings": {
-		"multiplier": {
-			"name": "Multiplier",
-            "description": "<cb>Render FPS Multiplier</c>",
+		"fps": {
+			"name": "Render FPS",
 			"type": "int",
-			"default": 1,
-			"min": 1,
-			"max": 4,
+			"default": 60,
+			"min": 60,
 			"control": {
-				"arrows": true
-			}
+                "input": true,
+				"slider": false,
+				"arrows": false
+            }
 		}
 	}
 }

@@ -2,29 +2,6 @@
 
 using namespace geode::prelude;
 
-double get_refresh_rate() {
-	static const double refresh_rate = [] {
-		DEVMODEA device_mode;
-		memset(&device_mode, 0, sizeof(device_mode));
-		device_mode.dmSize = sizeof(device_mode);
-		device_mode.dmDriverExtra = 0;
-
-		if (EnumDisplaySettingsA(NULL, ENUM_CURRENT_SETTINGS, &device_mode) == 0) {
-			return 60.0;
-		} else {
-			// TODO: see if there is a way to get the exact frequency?
-			// like 59.940hz
-			auto freq = device_mode.dmDisplayFrequency;
-			// interlaced screens actually display twice of the reported frequency
-			if (device_mode.dmDisplayFlags & DM_INTERLACED) {
-				freq *= 2;
-			}
-			return static_cast<double>(freq);
-		}
-	}();
-	return refresh_rate;
-}
-
 double delta_count = 0.0;
 bool enabled = true;
 
@@ -36,10 +13,8 @@ class $modify(CCDirector) {
 			return CCDirector::drawScene();
 		}
 
-		// always target the refresh rate of the monitor (* multiplier, defaults to ×1)
-		const double target_fps = get_refresh_rate() * Mod::get()->getSettingValue<int64_t>("multiplier");;
-
-		const double target_delta = 1.0 / target_fps;
+		// always target the fps set in settings
+		const double target_delta = 1.0 / Mod::get()->getSettingValue<int64_t>("fps");
 
 		delta_count += this->getActualDeltaTime();
 
