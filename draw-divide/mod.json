@@ -6,5 +6,18 @@
 	"name": "Draw divide",
 	"developer": "mat",
 	"description": "Makes the game render at native refresh rate, helping perfomance.",
-	"repository": "https://github.com/matcool/geode-mods"
+	"repository": "https://github.com/matcool/geode-mods",
+	"settings": {
+		"multiplier": {
+			"name": "Multiplier",
+            "description": "<cb>Render FPS Multiplier</c>",
+			"type": "int",
+			"default": 1,
+			"min": 1,
+			"max": 4,
+			"control": {
+				"arrows": true
+			}
+		}
+	}
 }

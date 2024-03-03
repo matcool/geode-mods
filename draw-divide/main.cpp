@@ -36,8 +36,8 @@ class $modify(CCDirector) {
 			return CCDirector::drawScene();
 		}
 
-		// always target the refresh rate of the monitor
-		const double target_fps = get_refresh_rate();
+		// always target the refresh rate of the monitor (* multiplier, defaults to ×1)
+		const double target_fps = get_refresh_rate() * Mod::get()->getSettingValue<int64_t>("multiplier");;
 
 		const double target_delta = 1.0 / target_fps;
 
