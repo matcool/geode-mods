@@ -1,10 +1,23 @@
 {
 	"geode": "v2.0.0",
 	"gd": "*",
-	"version": "v1.0.1",
+	"version": "v1.0.2",
 	"id": "mat.draw-divide",
 	"name": "Draw divide",
 	"developer": "mat",
 	"description": "Makes the game render at native refresh rate, helping perfomance.",
-	"repository": "https://github.com/matcool/geode-mods"
+	"repository": "https://github.com/matcool/geode-mods",
+	"settings": {
+		"fps": {
+			"name": "Render FPS",
+			"type": "int",
+			"default": 60,
+			"min": 60,
+			"control": {
+                "input": true,
+				"slider": false,
+				"arrows": false
+            }
+		}
+	}
 }
