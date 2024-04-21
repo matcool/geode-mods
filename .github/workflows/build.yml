@@ -36,7 +36,8 @@ jobs:
         uses: geode-sdk/build-geode-mod@main
         with:
           combine: true
-          build-config: MinSizeRel
+          configure-args: '-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON'
+          build-args: '-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON'
           target: ${{ matrix.config.target }}
       
   package:
