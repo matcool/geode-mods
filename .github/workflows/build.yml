@@ -37,7 +37,6 @@ jobs:
         with:
           combine: true
           configure-args: '-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON'
-          build-args: '-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON'
           target: ${{ matrix.config.target }}
       
   package:
