@@ -28,6 +28,14 @@ double get_refresh_rate() {
 double delta_count = 0.0;
 bool enabled = true;
 
+// #define DEBUG_FPS
+
+#ifdef DEBUG_FPS
+int count_total = 0;
+int count_render = 0;
+double total_time = 0.0;
+#endif
+
 #include <Geode/modify/CCDirector.hpp>
 class $modify(CCDirector) {
 	void drawScene() {
@@ -43,12 +51,29 @@ class $modify(CCDirector) {
 
 		delta_count += this->getActualDeltaTime();
 
+#ifdef DEBUG_FPS
+		++count_total;
+		total_time += this->getActualDeltaTime();
+#endif
+
 		// run full scene draw (glClear, visit) each time the counter is full
 		if (delta_count >= target_delta) {
 			// keep left over
 			delta_count -= target_delta;
+#ifdef DEBUG_FPS
+			++count_render;
+#endif
 			return CCDirector::drawScene();
 		}
+
+#ifdef DEBUG_FPS
+		if (total_time >= 1.f) {
+			total_time = 0.0;
+			log::debug("{} fps, {} tps", count_render, count_total);
+			count_render = 0;
+			count_total = 0;
+		}
+#endif
 
 		// otherwise, we only run updates
 

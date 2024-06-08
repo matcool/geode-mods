@@ -1,7 +1,9 @@
 {
-	"geode": "v2.0.0-beta.24",
-	"gd": "*",
-	"version": "v1.0.2",
+	"geode": "3.0.0-alpha.1",
+	"gd": {
+		"win": "*"
+	},
+	"version": "1.1.0",
 	"id": "mat.draw-divide",
 	"name": "Draw divide",
 	"developer": "mat",
