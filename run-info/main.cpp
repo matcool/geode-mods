@@ -128,10 +128,12 @@ public:
 
 
 class $modify(PlayLayer) {
-	RunInfoWidget* m_widget = nullptr;
-	// TODO: once we recreate getCurrentPercent maybe switch to float,
-	// and add option for decimals
-	int m_initial_percent = 0;
+	struct Fields {
+		RunInfoWidget* m_widget = nullptr;
+		// TODO: once we recreate getCurrentPercent maybe switch to float,
+		// and add option for decimals
+		int m_initial_percent = 0;
+	};
 
 	bool init(GJGameLevel* level, bool unk1, bool unk2) {
 		if (!PlayLayer::init(level, unk1, unk2)) return false;
