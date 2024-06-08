@@ -8,5 +8,10 @@
 	"name": "Draw divide",
 	"developer": "mat",
 	"description": "Makes the game render at native refresh rate, helping perfomance.",
-	"repository": "https://github.com/matcool/geode-mods"
+	"repository": "https://github.com/matcool/geode-mods",
+	"tags": [
+		"perfomance",
+		"universal",
+		"offline"
+	]
 }
