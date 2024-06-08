@@ -19,9 +19,9 @@ public:
 	Position m_last_pos;
 	bool m_was_practice = true;
 
-	static RunInfoWidget* create(Position pos) {
+	static RunInfoWidget* create(PlayLayer* layer, Position pos) {
 		auto* ret = new (std::nothrow) RunInfoWidget;
-		if (ret && ret->init(pos)) {
+		if (ret && ret->init(layer, pos)) {
 			ret->autorelease();
 			return ret;
 		} else {
@@ -30,7 +30,7 @@ public:
 		}
 	}
 
-	bool init(Position pos) {
+	bool init(PlayLayer* layer, Position pos) {
 		if (!CCNode::init()) return false;
 		m_status_label = make_factory(CCLabelBMFont::create("Practice", "bigFont.fnt"))
 			.setOpacity(64)
@@ -46,7 +46,7 @@ public:
 
 		this->reset_icon("checkpoint_01_001.png");
 
-		this->update_position(pos);
+		this->update_position(layer, pos);
 
 		float height = m_status_label->getScaledContentSize().height + m_info_label->getScaledContentSize().height;
 		float width = m_status_label->getScaledContentSize().width;
@@ -66,12 +66,14 @@ public:
 			.end();
 	}
 
-	void update_position(Position pos) {
+	void update_position(PlayLayer* layer, Position pos) {
 		bool show_icon = Mod::get()->getSettingValue<bool>("show-icon");
 		if (!Mod::get()->getSettingValue<bool>("use-start-pos") && !m_was_practice)
 			show_icon = false;
 		const bool show_status = Mod::get()->getSettingValue<bool>("show-mode");
-		const bool show_info = Mod::get()->getSettingValue<bool>("show-from");
+		const bool is_platformer = layer->m_level->isPlatformer();
+		// From x% is useless in platformer mode, force it off
+		const bool show_info = !is_platformer && Mod::get()->getSettingValue<bool>("show-from");
 
 		const float y = show_info ? m_info_label->getScaledContentSize().height : 0.f;
 		m_icon_sprite->setPositionY(y - 1.f);
@@ -152,7 +154,7 @@ class $modify(PlayLayer) {
 
 		const auto win_size = CCDirector::sharedDirector()->getWinSize();
 
-		m_fields->m_widget = make_factory(RunInfoWidget::create(Position::Left))
+		m_fields->m_widget = make_factory(RunInfoWidget::create(this, Position::Left))
 			.setAnchorPoint(ccp(0.f, 1.f))
 			.setPosition(0.f, win_size.height - 2.f)
 			.setZOrder(999)
@@ -178,7 +180,7 @@ class $modify(PlayLayer) {
 
 		auto* widget = m_fields->m_widget;
 
-		widget->update_position(left ? Position::Left : Position::Right);
+		widget->update_position(this, left ? Position::Left : Position::Right);
 
 		const auto win_size = CCDirector::sharedDirector()->getWinSize();
 
