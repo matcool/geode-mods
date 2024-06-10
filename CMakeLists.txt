@@ -24,7 +24,7 @@ if (WIN32)
 # 	# no android yet, maybe i could add pinch to zoom or smth
 # 	add_subdirectory(scroll-zoom)
 
-# 	add_subdirectory(max-window)
+	add_subdirectory(max-window)
 endif()
 
 # add_subdirectory(physics-btns)
