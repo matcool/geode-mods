@@ -9,7 +9,11 @@
 	"name": "Circle Tool",
 	"developer": "mat",
 	"description": "An editor tool to duplicate and rotate objects.",
-	"tags": ["Editor"],
+	"tags": [
+		"offline",
+		"editor",
+		"utility"
+	],
 	"resources": {
 		"sprites": [
 			"res/screenshot.png"

@@ -31,5 +31,10 @@
 			"description": "Speed for how fast the editor pans when you scroll the mouse."
 		}
 	},
-	"repository": "https://github.com/matcool/geode-mods"
+	"repository": "https://github.com/matcool/geode-mods",
+	"tags": [
+		"offline",
+		"editor",
+		"enhancement"
+	]
 }

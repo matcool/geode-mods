@@ -10,7 +10,7 @@
 	"description": "Makes the game render at native refresh rate, helping perfomance.",
 	"repository": "https://github.com/matcool/geode-mods",
 	"tags": [
-		"perfomance",
+		"performance",
 		"universal",
 		"offline"
 	]

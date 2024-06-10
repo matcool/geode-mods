@@ -9,7 +9,11 @@
 	"name": "Reference Image",
 	"developer": "mat",
 	"description": "An editor tool to display a reference image in the editor.",
-	"tags": ["Editor"],
+	"tags": [
+		"offline",
+		"editor",
+		"utility"
+	],
 	"resources": {
 		"spritesheets": {
 			"EditorImageButton": [

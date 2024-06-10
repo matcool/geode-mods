@@ -22,5 +22,11 @@
 			"type": "bool",
 			"default": false
 		}
-	}
+	},
+	"tags": [
+		"universal",
+		"offline",
+		"enhancement",
+		"utility"
+	]
 }
