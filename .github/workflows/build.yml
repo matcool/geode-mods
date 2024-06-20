@@ -15,8 +15,8 @@ jobs:
         - name: Windows
           os: windows-latest
           
-        # - name: macOS
-        #   os: macos-latest
+        - name: macOS
+          os: macos-latest
 
         # - name: Android32
         #   os: ubuntu-latest
@@ -37,7 +37,7 @@ jobs:
         with:
           combine: true
           # TODO: remember to update this!
-          sdk: 3.0.0-beta.1
+          sdk: 3.0.0-beta.4
           target: ${{ matrix.config.target }}
       
   package:
