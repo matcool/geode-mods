@@ -8,7 +8,7 @@
 	"id": "mat.song-preview",
 	"name": "Advanced Song Preview",
 	"developer": "mat",
-	"description": "An editor tool to duplicate and rotate objects.",
+	"description": "A tool to view waveforms of local songs.",
 	"tags": [
 		"offline",
 		"editor",
