@@ -14,6 +14,7 @@ endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
+CPMAddPackage("gh:camila314/uibuilder#c662f54")
 add_subdirectory(nodes)
 
 if (WIN32)
@@ -32,3 +33,4 @@ endif()
 # add_subdirectory(reference-image)
 add_subdirectory(run-info)
 # add_subdirectory(song-search)
+add_subdirectory(song-preview)

@@ -1,0 +1,23 @@
+{
+	"geode": "3.0.0-beta.4",
+	"gd": {
+		"win": "2.206",
+		"android": "2.206"
+	},
+	"version": "1.0.0",
+	"id": "mat.song-preview",
+	"name": "Advanced Song Preview",
+	"developer": "mat",
+	"description": "An editor tool to duplicate and rotate objects.",
+	"tags": [
+		"offline",
+		"editor",
+		"utility"
+	],
+	"resources": {
+		"sprites": [
+			"res/cursor.png"
+		]
+	},
+	"repository": "https://github.com/matcool/geode-mods"
+}
