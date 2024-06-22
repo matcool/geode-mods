@@ -147,7 +147,7 @@ std::pair<CCPoint, bool> testTouchInside(CCTouch* touch, CCNode* node) {
 	return {nodeLocation, inside};
 }
 
-class DetailedAudioPreviewPopup : public geode::Popup<int> {
+class DetailedAudioPreviewPopup : public geode::Popup<int, CustomSongWidget*> {
 protected:
 	int m_songId;
 	CCNode* m_drawNode;
@@ -160,11 +160,14 @@ protected:
 	CCSprite* m_cursorNode;
 	CCSize m_widgetSize;
 	CCSize m_barSize;
+	CustomSongWidget* m_parentWidget = nullptr;
 
 	EventListener<SampleInfo::SampleTask> m_sampleTaskListener;
 
-    bool setup(int value) override {
+    bool setup(int value, CustomSongWidget* parent) override {
 		this->setID("DetailedAudioPreviewPopup"_spr);
+
+		m_parentWidget = parent;
 
         auto winSize = CCDirector::sharedDirector()->getWinSize();
 		m_songId = value;
@@ -303,6 +306,14 @@ protected:
 
 		this->visualSeekTo(0.f);
 
+		uibuilder::Build<ButtonSprite>::create("Use")
+			.intoMenuItem(this, menu_selector(DetailedAudioPreviewPopup::onUseSong))
+			.anchorPoint(0.5f, 0.f)
+			.with([this](auto* node) {
+				m_buttonMenu->addChildAtPosition(node, Anchor::Bottom, ccp(0.f, 10.f));
+			})
+		;
+
         return true;
     }
 
@@ -439,21 +450,30 @@ protected:
 		this->visualSeekTo(m_startOffset / m_songLength);
 	}
 
+	void onUseSong(CCObject*) {
+		auto* editor = LevelEditorLayer::get();
+		if (editor && m_parentWidget) {
+			editor->m_levelSettings->m_songOffset = m_startOffset;
+			m_parentWidget->onSelect(nullptr);
+		}
+		this->onClose(nullptr);
+	}
+
 public:
-    static DetailedAudioPreviewPopup* create(int text) {
+    static DetailedAudioPreviewPopup* create(int text, CustomSongWidget* parent) {
         auto ret = new DetailedAudioPreviewPopup();
-        if (ret && ret->initAnchored(360.f, 190.f, text)) {
+        if (ret->initAnchored(360.f, 240.f, text, parent)) {
             ret->autorelease();
-            return ret;
-        }
-        CC_SAFE_DELETE(ret);
-        return nullptr;
+        } else {
+        	CC_SAFE_DELETE(ret);
+		}
+		return ret;
     }
 };
 
 #include <Geode/modify/CustomSongWidget.hpp>
 class $modify(CustomSongWidget) {
 	void onPlayback(CCObject*) {
-		DetailedAudioPreviewPopup::create(m_songInfoObject->m_songID)->show();
+		DetailedAudioPreviewPopup::create(m_songInfoObject->m_songID, this)->show();
 	}
 };
