@@ -465,7 +465,7 @@ protected:
 public:
     static DetailedAudioPreviewPopup* create(int text, CustomSongWidget* parent) {
         auto ret = new DetailedAudioPreviewPopup();
-        if (ret->initAnchored(360.f, 240.f, text, parent)) {
+        if (ret->initAnchored(CCDirector::get()->getWinSize().width / 2.f + 75.5f, 240.f, text, parent)) {
             ret->autorelease();
         } else {
         	CC_SAFE_DELETE(ret);
