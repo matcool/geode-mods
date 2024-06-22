@@ -175,7 +175,10 @@ protected:
 		auto path = MusicDownloadManager::sharedState()->pathForSong(m_songId);
 		path = CCFileUtils::get()->fullPathForFilename(path.c_str(), false);
 		
-		FMODAudioEngine::sharedEngine()->stopAllMusic();
+		auto* engine = FMODAudioEngine::sharedEngine();
+		engine->stopAllMusic();
+		engine->playMusic(path, false, 0.f, 0);
+
 
 		float targetWidth = winSize.width / 2.f;
 		auto frameSize = CCDirector::sharedDirector()->getOpenGLView()->getFrameSize();
@@ -440,7 +443,7 @@ protected:
 		if (engine->isMusicPlaying(0)) {
 			engine->pauseMusic(0);
 		} else {
-			engine->playMusic(path, false, 0.f, 2);
+			engine->playMusic(path, false, 0.f, 0);
 		}
 	}
 
@@ -473,7 +476,11 @@ public:
 
 #include <Geode/modify/CustomSongWidget.hpp>
 class $modify(CustomSongWidget) {
-	void onPlayback(CCObject*) {
-		DetailedAudioPreviewPopup::create(m_songInfoObject->m_songID, this)->show();
+	void onPlayback(CCObject* sender) {
+		if (LevelEditorLayer::get()) {
+			DetailedAudioPreviewPopup::create(m_songInfoObject->m_songID, this)->show();
+		} else {
+			CustomSongWidget::onPlayback(sender);
+		}
 	}
 };
