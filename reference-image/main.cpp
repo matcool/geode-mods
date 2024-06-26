@@ -4,20 +4,24 @@ using namespace geode::prelude;
 
 #include <Geode/modify/EditorUI.hpp>
 class $modify(MyEditorUI, EditorUI) {
-	GameObject* m_object = nullptr;
-	CCSprite* m_sprite = nullptr;
+	struct Fields {
+		GameObject* m_object = nullptr;
+		CCSprite* m_sprite = nullptr;
+	};
 
 	void onButton(CCObject*) {
 		if (this->getSelectedObjects()->count() == 1) {
 			auto* object = CCArrayExt<GameObject*>(this->getSelectedObjects())[0];
 			m_fields->m_object = object;
-			utils::file::pickFile(file::PickMode::OpenFile, {}, [this, object](ghc::filesystem::path const& path) {
+			utils::file::pick(file::PickMode::OpenFile, {}).listen([this, object](Result<std::filesystem::path>* result) {
+				if (!*result) return;
+				auto path = result->unwrap();
 				if (m_fields->m_sprite) {
 					m_fields->m_sprite->removeFromParent();
 					m_fields->m_sprite = nullptr;
 				}
 				auto* sprite = CCSprite::create(path.string().c_str());
-				if (sprite) {
+				if (sprite || !sprite->getUserObject("geode.texture-loader/fallback")) {
 					m_fields->m_sprite = sprite;
 					m_editorLayer->m_objectLayer->addChild(sprite);
 				} else {

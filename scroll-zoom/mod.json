@@ -1,7 +1,7 @@
 {
-	"geode": "v2.0.0-beta.24",
+	"geode": "3.1.1",
 	"gd": {
-		"win": "2.204"
+		"win": "2.206"
 	},
 	"version": "v1.1.1",
 	"id": "mat.scroll-zoom",
