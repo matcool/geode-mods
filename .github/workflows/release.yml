@@ -46,7 +46,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ inputs.mod-id }}-${{ steps.info.outputs.version }}
-          draft: true
           files: |
             ./artifacts/Build Output/mat.${{ inputs.mod-id }}.geode
       
