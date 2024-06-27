@@ -1,8 +1,8 @@
-#include "Geode/ui/TextInput.hpp"
 #include <Geode/Geode.hpp>
 #include <unordered_map>
 #include <UIBuilder.hpp>
 #include <span>
+#include <cstdio>
 
 using namespace geode::prelude;
 using uibuilder::Build;
@@ -502,9 +502,9 @@ protected:
 		int minutes = 0;
 		float seconds = 0;
 		float time = 0.f;
-		if (sscanf_s(str.c_str(), "%d:%f", &minutes, &seconds) == 2) {
+		if (std::sscanf(str.c_str(), "%d:%f", &minutes, &seconds) == 2) {
 			time = minutes * 60.f + seconds;
-		} else if (sscanf_s(str.c_str(), "%f", &seconds) == 1) {
+		} else if (std::sscanf(str.c_str(), "%f", &seconds) == 1) {
 			time = seconds;
 		} else {
 			return;
