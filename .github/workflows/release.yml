@@ -1,4 +1,4 @@
-name: Draft Release
+name: Publish Release
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ on:
 
 jobs:
   draft:
-    name: Draft Release
+    name: Publish Release
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -54,10 +54,9 @@ jobs:
             ./artifacts/Build Output/mat.${{ inputs.mod-id }}.geode
 
       # fetches latest cli
-      - uses: geode-sdk/geode/.github/actions/setup-cli@39bb2dcf87a6514fef55d1e3e1850faa7cf0f649
+      - name: Setup CLI
         if: ${{ inputs.publish }}
-        with:
-          host: linux
+        uses: geode-sdk/cli/.github/actions/setup@main
       
       - name: Publish to index
         if: ${{ inputs.publish }}
