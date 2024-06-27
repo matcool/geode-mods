@@ -52,12 +52,6 @@ jobs:
           tag_name: ${{ inputs.mod-id }}-${{ steps.info.outputs.version }}
           files: |
             ./artifacts/Build Output/mat.${{ inputs.mod-id }}.geode
-      
-      - name: Setup tmate session
-        if: ${{ !cancelled() && inputs.debug }}
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
 
       # fetches latest cli
       - uses: geode-sdk/geode/.github/actions/setup-cli@39bb2dcf87a6514fef55d1e3e1850faa7cf0f649
@@ -70,3 +64,9 @@ jobs:
         run: |
           geode index login --token ${{ secrets.GEODE_TOKEN }}
           geode index mods update ${{ fromJSON(steps.create_release.outputs.assets)[0].browser_download_url }}
+
+      - name: Setup tmate session
+        if: ${{ !cancelled() && inputs.debug }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
