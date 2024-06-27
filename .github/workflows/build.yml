@@ -44,7 +44,7 @@ jobs:
     name: Package builds
     runs-on: ubuntu-latest
     # run even if one of the platforms fails
-    if: !cancelled()
+    if: '!cancelled()'
     needs: build
 
     steps:
