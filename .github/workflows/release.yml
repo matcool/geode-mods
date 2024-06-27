@@ -60,7 +60,7 @@ jobs:
           limit-access-to-actor: true
 
       # fetches latest cli
-      - uses: geode-sdk/geode/.github/actions/setup-cli@39bb2dc
+      - uses: geode-sdk/geode/.github/actions/setup-cli@39bb2dcf87a6514fef55d1e3e1850faa7cf0f649
         if: ${{ inputs.publish }}
         with:
           host: linux
