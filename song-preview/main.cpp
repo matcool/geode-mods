@@ -5,6 +5,7 @@
 #include <span>
 
 using namespace geode::prelude;
+using uibuilder::Build;
 
 struct SampleInfo {
 	std::vector<float> samples;
@@ -16,14 +17,13 @@ struct SampleInfo {
 		FMOD::Sound* sound;
 		const FMOD_MODE mode = FMOD_DEFAULT | FMOD_OPENONLY;
 		auto result = engine->m_system->createSound(songPath.data(), mode, nullptr, &sound);
-		log::info("path is {}", songPath.data());
 		if (result != FMOD_OK) {
-			log::info("Error creating sound! {}", int(result));
+			log::error("Error creating sound! {}", int(result));
 		}
 		unsigned int lengthMilliseconds;
 		result = sound->getLength(&lengthMilliseconds, FMOD_TIMEUNIT_MS);
 		if (result != FMOD_OK) {
-			log::info("Error getting length {}", int(result));
+			log::error("Error getting length {}", int(result));
 		}
 		float songLength = static_cast<float>(lengthMilliseconds) / 1000.f;
 
@@ -58,6 +58,10 @@ struct SampleInfo {
 			}
 
 			sound->release();
+
+			// code based off config's mod:
+			// https://github.com/cgytrus/EditorWaveform/blob/main/src/dllmain.cpp
+			// lots of adjustments were made to make it match newground's waveform
 
 			sampleCount = rawDataSize / bytesPerSample;
 			bytesPerSample /= channels;
@@ -147,9 +151,9 @@ std::pair<CCPoint, bool> testTouchInside(CCTouch* touch, CCNode* node) {
 	return {nodeLocation, inside};
 }
 
-class DetailedAudioPreviewPopup : public geode::Popup<int, CustomSongWidget*> {
+class DetailedAudioPreviewPopup : public geode::Popup<SongInfoObject*, CustomSongWidget*>, public TextInputDelegate {
 protected:
-	int m_songId;
+	int m_songID;
 	CCNode* m_drawNode;
 	CCNode* m_overlayNode;
 	CCNode* m_overlay2Node;
@@ -164,15 +168,20 @@ protected:
 
 	EventListener<SampleInfo::SampleTask> m_sampleTaskListener;
 
-    bool setup(int value, CustomSongWidget* parent) override {
+    bool setup(SongInfoObject* songInfo, CustomSongWidget* parent) override {
 		this->setID("DetailedAudioPreviewPopup"_spr);
 
+		m_songID = songInfo->m_songID;
 		m_parentWidget = parent;
 
-        auto winSize = CCDirector::sharedDirector()->getWinSize();
-		m_songId = value;
+		if (auto* editor = LevelEditorLayer::get()) {
+			if (editor->m_level->m_songID == m_songID)
+				m_startOffset = editor->m_levelSettings->m_songOffset;
+		}
 
-		auto path = MusicDownloadManager::sharedState()->pathForSong(m_songId);
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+		auto path = MusicDownloadManager::sharedState()->pathForSong(m_songID);
 		path = CCFileUtils::get()->fullPathForFilename(path.c_str(), false);
 		
 		auto* engine = FMODAudioEngine::sharedEngine();
@@ -223,7 +232,8 @@ protected:
 
 		this->schedule(schedule_selector(DetailedAudioPreviewPopup::update), 1.f / 60.f);
 
-		uibuilder::Build<CCNode>::create()
+		Build<CCNode>::create()
+			.id("main-layout")
 			.anchorPoint(0.5, 0.5)
 			.layout(ColumnLayout::create()
 				->setAxisAlignment(AxisAlignment::Start)
@@ -232,7 +242,7 @@ protected:
 				->setAxisReverse(true)
 				->setGap(0.f)
 			)
-			.child(uibuilder::Build<CCNode>::create()
+			.child(Build<CCNode>::create()
 				.zOrder(-2)
 				.contentSize(m_widgetSize)
 				.layout(RowLayout::create()
@@ -241,58 +251,56 @@ protected:
 					->setAutoScale(false)
 					->setGrowCrossAxis(true)
 				)
-				.child(uibuilder::Build<CCSprite>::create("cursor.png"_spr)
+				.child(Build<CCSprite>::create("cursor.png"_spr)
 					.anchorPoint(0.5f, 0.f)
 					.store(m_cursorNode)
 				)
 				.updateLayout()
 			)
 			.child(m_drawNode)
-			.child(uibuilder::Build<CCNode>::create()
+			.child(Build<CCNode>::create()
 				.contentSize(m_widgetSize)
 				.layout(RowLayout::create()
 					->setAxisAlignment(AxisAlignment::Between)
 					->setGap(0.f)
 					->setGrowCrossAxis(true)
 				)
-				.child(uibuilder::Build<CCMenu>::create()
+				.child(Build<CCMenu>::create()
 					.layout(RowLayout::create()
 						->setAxisAlignment(AxisAlignment::Start)
 						->setAutoGrowAxis(1.f)
 						->setGap(0.f)
 					)
-					.child(uibuilder::Build<CCSprite>::createSpriteName("GJ_undoBtn_001.png")
+					.child(Build<CCSprite>::createSpriteName("GJ_undoBtn_001.png")
 						.intoMenuItem(this, menu_selector(DetailedAudioPreviewPopup::onGoToStartOffset))
 					)
-					.child(uibuilder::Build<CCSprite>::createSpriteName("GJ_playMusicBtn_001.png")
+					.child(Build<CCSprite>::createSpriteName("GJ_playMusicBtn_001.png")
 						.intoMenuItem(this, menu_selector(DetailedAudioPreviewPopup::onPlay))
 					)
 					.updateLayout()
 				)
-				.child(uibuilder::Build<CCLabelBMFont>::create("hello", "chatFont.fnt")
+				.child(Build<CCLabelBMFont>::create("hello", "chatFont.fnt")
 					.anchorPoint(1.f, 0.5f)
 					.store(m_timeLabel)
 				)
 				.updateLayout()
 			)
-			.child(uibuilder::Build<CCNode>::create()
+			.child(Build<CCNode>::create()
 				.contentSize(m_widgetSize)
 				.layout(RowLayout::create()
 					->setAxisAlignment(AxisAlignment::Start)
 					->setGrowCrossAxis(true)
 					->setAutoScale(false)
 				)
-				.child(uibuilder::Build<CCLabelBMFont>::create("Start Offset", "bigFont.fnt")
+				.child(Build<CCLabelBMFont>::create("Start Offset", "bigFont.fnt")
 					.anchorPoint(0.f, 0.5f)
 					.scale(0.5f)
 				)
-				.child(uibuilder::Build<geode::TextInput>::create(50.f, "x:xx", "chatFont.fnt")
-					.with([](geode::TextInput* node) {
+				.child(Build<geode::TextInput>::create(50.f, "x:xx", "chatFont.fnt")
+					.with([this](geode::TextInput* node) {
 						node->setString("0:00");
 						node->setFilter("0123456789:.");
-						node->setCallback([](auto const& data) {
-							log::info("got it {}", data);
-						});
+						node->setDelegate(this);
 					})
 					.store(m_startOffsetInput)
 				)
@@ -304,17 +312,43 @@ protected:
 			})
 		;
 
-		// cheat layouts
-		m_cursorNode->setPositionX(0.f);
+		this->seekOffsetTo(m_startOffset / m_songLength);
 
 		this->visualSeekTo(0.f);
 
-		uibuilder::Build<ButtonSprite>::create("Use")
+		Build<ButtonSprite>::create("Use")
 			.intoMenuItem(this, menu_selector(DetailedAudioPreviewPopup::onUseSong))
+			.id("use-button")
 			.anchorPoint(0.5f, 0.f)
 			.with([this](auto* node) {
 				m_buttonMenu->addChildAtPosition(node, Anchor::Bottom, ccp(0.f, 10.f));
 			})
+		;
+
+		Build<CCNode>::create()
+			.id("song-info-layout")
+			.anchorPoint(0.5, 0.5)
+			.layout(ColumnLayout::create()
+				->setAxisAlignment(AxisAlignment::End)
+				->setCrossAxisLineAlignment(AxisAlignment::Start)
+				->setAxisReverse(true)
+				->setGrowCrossAxis(true)
+				->setAutoGrowAxis(1.f)
+				->setGap(0.f)
+				->setAutoScale(false)
+			)
+			.child(Build<CCLabelBMFont>::create(songInfo->m_songName.c_str(), "bigFont.fnt")
+				.anchorPoint(0, 0.5)
+				.limitLabelWidth(m_widgetSize.width, 0.68f, 0.1f)
+			)
+			.child(Build<CCLabelBMFont>::create(songInfo->m_artistName.c_str(), "goldFont.fnt")
+				.anchorPoint(0, 0.5)
+				.scale(0.55)
+			)
+			.with([this](auto* node) {
+				m_mainLayer->addChildAtPosition(node, Anchor::Top, ccp(0.f, -29.f));
+			})
+			.updateLayout()
 		;
 
         return true;
@@ -362,11 +396,11 @@ protected:
 	}
 
 	bool m_seekingOffset = false;
-	void seekOffsetTo(float percent) {
+	void seekOffsetTo(float percent, bool updateInput = true) {
 		percent = std::clamp(percent, 0.f, 1.f);
 		m_startOffset = percent * m_songLength;
 		m_cursorNode->setPositionX(percent * m_widgetSize.width);
-		{
+		if (updateInput) {
 			auto time = fmt::format("{}:{:05.2f}", int(m_startOffset) / 60, std::fmod(m_startOffset, 60.f));
 			m_startOffsetInput->setString(time);
 		}
@@ -438,7 +472,7 @@ protected:
 	}
 
 	void onPlay(CCObject*) {
-		auto path = MusicDownloadManager::sharedState()->pathForSong(m_songId);
+		auto path = MusicDownloadManager::sharedState()->pathForSong(m_songID);
 		auto* engine = FMODAudioEngine::sharedEngine();
 		if (engine->isMusicPlaying(0)) {
 			engine->pauseMusic(0);
@@ -462,10 +496,31 @@ protected:
 		this->onClose(nullptr);
 	}
 
+    void textChanged(CCTextInputNode* input) override {
+		// try to parse it, ignore if it fails
+		auto str = input->getString();
+		int minutes = 0;
+		float seconds = 0;
+		float time = 0.f;
+		if (sscanf_s(str.c_str(), "%d:%f", &minutes, &seconds) == 2) {
+			time = minutes * 60.f + seconds;
+		} else if (sscanf_s(str.c_str(), "%f", &seconds) == 1) {
+			time = seconds;
+		} else {
+			return;
+		}
+
+		this->seekOffsetTo(time / m_songLength, false);
+	}
+
+    void textInputClosed(CCTextInputNode* input) override {
+		this->seekOffsetTo(m_startOffset / m_songLength);
+	}
+
 public:
-    static DetailedAudioPreviewPopup* create(int text, CustomSongWidget* parent) {
+    static DetailedAudioPreviewPopup* create(SongInfoObject* info, CustomSongWidget* parent) {
         auto ret = new DetailedAudioPreviewPopup();
-        if (ret->initAnchored(CCDirector::get()->getWinSize().width / 2.f + 75.5f, 240.f, text, parent)) {
+        if (ret->initAnchored(CCDirector::get()->getWinSize().width / 2.f + 75.5f, 240.f, info, parent)) {
             ret->autorelease();
         } else {
         	CC_SAFE_DELETE(ret);
@@ -477,8 +532,8 @@ public:
 #include <Geode/modify/CustomSongWidget.hpp>
 class $modify(CustomSongWidget) {
 	void onPlayback(CCObject* sender) {
-		if (LevelEditorLayer::get()) {
-			DetailedAudioPreviewPopup::create(m_songInfoObject->m_songID, this)->show();
+		if (LevelEditorLayer::get() && getChildOfType<LevelSettingsLayer>(CCScene::get(), 0)) {
+			DetailedAudioPreviewPopup::create(m_songInfoObject, this)->show();
 		} else {
 			CustomSongWidget::onPlayback(sender);
 		}
