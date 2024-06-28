@@ -1,0 +1,18 @@
+{
+	"geode": "3.1.1",
+	"gd": {
+		"win": "2.206",
+		"android": "2.206",
+		"mac": "2.206"
+	},
+	"version": "1.0.0",
+	"id": "mat.ingame-screenshot",
+	"name": "ingame-screenshot",
+	"developer": "mat",
+	"description": "ingame-screenshot",
+	"tags": [
+		"offline",
+		"utility"
+	],
+	"repository": "https://github.com/matcool/geode-mods"
+}

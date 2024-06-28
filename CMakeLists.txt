@@ -23,6 +23,7 @@ if (WIN32)
 # 	add_subdirectory(jump-key)
 
 	add_subdirectory(max-window)
+	add_subdirectory(ingame-screenshot)
 endif()
 
 add_subdirectory(scroll-zoom)
