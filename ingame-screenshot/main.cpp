@@ -1,3 +1,4 @@
+#include "RenderTexture.hpp"
 #include <Geode/Geode.hpp>
 
 using namespace geode::prelude;
@@ -26,60 +27,51 @@ public:
 
 using uint = unsigned int;
 
-void copy_screenshot(unsigned char* data, const CCSize& size, uint x = 0, uint y = 0, uint a = 0, uint b = 0) {
+void copy_screenshot(std::unique_ptr<uint8_t[]> data, const CCSize& size, uint x = 0, uint y = 0, uint a = 0, uint b = 0) {
     const auto src_width = static_cast<uint>(size.width);
     const auto src_height = static_cast<uint>(size.height);
     a = a ? a : src_width;
     b = b ? b : src_height;
-    std::thread([=]() {
-        auto len = static_cast<size_t>((a - x) * (b - y));
-        auto buffer = reinterpret_cast<uint32_t*>(malloc(len * sizeof(uint32_t)));
-        auto cx = x, cy = y;
-        for (size_t i = 0; i < len; ++i) {
-            const size_t j = ((src_height - cy) * src_width + cx) << 2;
-            if (++cx == a) ++cy, cx = x;
-            buffer[i] = data[j] << 16 | data[j + 1] << 8 | data[j + 2];
+    std::thread([=, data = std::move(data)]() {
+        // auto area = static_cast<size_t>((a - x) * (b - y));
+		// auto bytesPerPixel = 3;
+        // auto buffer = reinterpret_cast<uint32_t*>(malloc(area * sizeof(uint32_t)));
+        // auto cx = x, cy = y;
+        // for (size_t i = 0; i < area * 4; ++i) {
+        //     const size_t j = ((src_height - cy) * src_width + cx) * bytesPerPixel;
+        //     if (++cx == a) ++cy, cx = x;
+        //     buffer[i] = data[j] << 16 | data[j + 1] << 8 | data[j + 2];
 
-            // const auto n = reinterpret_cast<uint32_t*>(data)[i];
-            // buffer[i] = (n & 0x0000FF) << 16 | (n & 0x00FF00) | (n & 0xFF0000) >> 16;
-        }
-        auto bitmap = CreateBitmap((a - x), (b - y), 1, 32, buffer);
+        //     // const auto n = reinterpret_cast<uint32_t*>(data)[i];
+        //     // buffer[i] = (n & 0x0000FF) << 16 | (n & 0x00FF00) | (n & 0xFF0000) >> 16;
+        // }
+        auto bitmap = CreateBitmap((int)size.width, (int)size.height, 1, 32, data.get());
 
         if (OpenClipboard(NULL))
             if (EmptyClipboard()) {
                 SetClipboardData(CF_BITMAP, bitmap);
                 CloseClipboard();
             }
-        free(buffer);
-        free(data);
+        // free(buffer);
     }).detach();
-}
-void copy_screenshot(MyRenderTexture* texture) {
-    copy_screenshot(texture->getData(), texture->getSizeInPixels());
 }
 
 class ImageAreaSelectLayer : public FLAlertLayer {
-    unsigned char* m_data;
+    std::unique_ptr<uint8_t[]> m_data;
     CCSize m_texture_size;
     CCDrawNode* m_stencil;
     CCPoint m_start_pos, m_end_pos;
     CCRect m_sprite_rect;
-    bool init(MyRenderTexture* tex) {
+    bool init(CCTexture2D* texture2d) {
         if (!initWithColor({0, 0, 0, 100})) return false;
 
         m_mainLayer = CCLayer::create();
         addChild(m_mainLayer);
 
-        m_data = tex->getData();
-        m_texture_size = tex->getSizeInPixels();
+        m_texture_size = texture2d->getContentSizeInPixels();
 
         const auto& winSize = CCDirector::sharedDirector()->getWinSize();
 
-        auto image = tex->newCCImage();
-        image->autorelease();
-        auto texture2d = new CCTexture2D;
-        texture2d->autorelease();
-        texture2d->initWithImage(image);
         auto sprite = CCSprite::createWithTexture(texture2d);
         sprite->setPosition(winSize / 2);
         sprite->setScale(0.75f);
@@ -148,21 +140,16 @@ class ImageAreaSelectLayer : public FLAlertLayer {
             uint y = static_cast<uint>(std::clamp((1.f - yf) * height, 0.f, height));
             uint a = static_cast<uint>(std::clamp(af * width, 0.f, width));
             uint b = static_cast<uint>(std::clamp((1.f - bf) * height, 0.f, height));
-            copy_screenshot(m_data, m_texture_size, x, y, a, b);
-            m_data = 0;
-            keyBackClicked();
+            copy_screenshot(std::move(m_data), m_texture_size, x, y, a, b);
+            this->keyBackClicked();
         }
     }
 
-    virtual void keyBackClicked() {
-        if (m_data) free(m_data);
-        FLAlertLayer::keyBackClicked();
-    }
-
 public:
-    static auto create(MyRenderTexture* tex) {
+    static auto create(CCTexture2D* tex, std::unique_ptr<uint8_t[]> data) {
         auto ret = new ImageAreaSelectLayer();
-        if (ret && ret->init(tex)) {
+		ret->m_data = std::move(data);
+        if (ret->init(tex)) {
             ret->autorelease();
         } else {
             CC_SAFE_DELETE(ret);
@@ -175,21 +162,21 @@ public:
 class $modify(CCKeyboardDispatcher) {
 	bool dispatchKeyboardMSG(enumKeyCodes key, bool down, bool repeat) {
 		if (down && key == enumKeyCodes::KEY_F2) {
-			log::info("hi");
-			auto start = std::chrono::high_resolution_clock::now();
 			auto director = CCDirector::sharedDirector();
 			auto winSize = director->getWinSize();
-			auto texture = static_cast<MyRenderTexture*>(CCRenderTexture::create(winSize.width, winSize.height));
 			auto scene = director->getRunningScene();
-			
-			texture->begin();
-			scene->visit();
-			texture->end();
+
+
+			auto captureSize = CCSize(1920, 1080);
+			RenderTexture texture(captureSize.width, captureSize.height);
+			auto data = texture.capture(scene);
+
+			auto* ctexture = texture.intoTexture();
 
 			if (director->getKeyboardDispatcher()->getShiftKeyPressed()) {
-				ImageAreaSelectLayer::create(texture)->show();
+				ImageAreaSelectLayer::create(ctexture, std::move(data))->show();
 			} else {
-				copy_screenshot(texture);
+				copy_screenshot(std::move(data), captureSize);
 			}
 		}
 		return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down, repeat);
