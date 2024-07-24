@@ -16,7 +16,6 @@ public:
 	CCLabelBMFont* m_status_label = nullptr;
 	CCLabelBMFont* m_info_label = nullptr;
 	CCSprite* m_icon_sprite = nullptr;
-	Position m_last_pos;
 	bool m_was_practice = true;
 
 	static RunInfoWidget* create(PlayLayer* layer, Position pos) {
@@ -83,7 +82,7 @@ public:
 		const bool left = pos == Position::Left;
 		const float h_flip = left ? 1.f : -1.f;
 		const auto anchor = ccp(left ? 0.f : 1.f, 0.f);
-		
+
 		m_icon_sprite->setAnchorPoint(anchor);
 		m_status_label->setAnchorPoint(anchor);
 		m_info_label->setAnchorPoint(anchor);
@@ -103,12 +102,10 @@ public:
 
 		float height = 0.f;
 		if (show_info)
-			height += m_info_label->getScaledContentSize().height;		
+			height += m_info_label->getScaledContentSize().height;
 		if (show_status || show_icon)
 			height += m_status_label->getScaledContentSize().height;
 		this->setContentSize({this->getContentSize().width, height});
-
-		m_last_pos = pos;
 	}
 
 	void update_labels(PlayLayer* layer, int percent) {
@@ -163,15 +160,15 @@ class $modify(PlayLayer) {
 
 		this->update_labels();
 		this->update_position();
-	
+
 		return true;
 	}
 
 	void update_position() {
-		// FIXME: switch to an enum type of setting.. whenever thats available (or make one myself)
+		auto const position = Mod::get()->getSettingValue<std::string>("position");
 		this->update_position(
-			Mod::get()->getSettingValue<bool>("position-top"),
-			Mod::get()->getSettingValue<bool>("position-left")
+			position == "Top Left" || position == "Top Right",
+			position == "Top Left" || position == "Bottom Left"
 		);
 	}
 
@@ -218,3 +215,18 @@ class $modify(PlayLayer) {
 		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
 	}
 };
+
+$on_mod(Loaded) {
+	// migrate old settings to "position"
+	auto container = Mod::get()->getSavedSettingsData();
+	if (container.contains("position-top") || container.contains("position-left")) {
+		auto top = container.try_get<bool>("position-top").value_or(false);
+		auto left = container.try_get<bool>("position-left").value_or(false);
+		log::debug("Migrating from old settings: top={} left={}", top, left);
+
+		Mod::get()->setSettingValue<std::string>("position", top ? (left ? "Top Left" : "Top Right") : (left ? "Bottom Left" : "Bottom Right"));
+
+		container.erase("position-top");
+		container.erase("position-left");
+	}
+}

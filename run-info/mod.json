@@ -5,21 +5,23 @@
 		"android": "2.206",
 		"mac": "2.206"
 	},
-	"version": "1.1.2",
+	"version": "1.2.0",
 	"id": "mat.run-info",
 	"name": "Run Info",
 	"developer": "mat",
 	"description": "Shows info about current run",
 	"settings": {
-		"position-top": {
-			"name": "Top",
-			"type": "bool",
-			"default": true
-		},
-		"position-left": {
-			"name": "Left",
-			"type": "bool",
-			"default": true
+		"position": {
+			"name": "Position",
+			"type": "string",
+			"default": "Top Left",
+			"description": "Where to place the run info widget on the screen",
+			"one-of": [
+				"Top Left",
+				"Top Right",
+				"Bottom Left",
+				"Bottom Right"
+			]
 		},
 		"show-icon": {
 			"name": "Show icon",
