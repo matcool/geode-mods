@@ -34,15 +34,18 @@ public:
 		m_status_label = make_factory(CCLabelBMFont::create("Practice", "bigFont.fnt"))
 			.setOpacity(64)
 			.setScale(0.5f)
+			.setID("mode-label"_spr)
 			.addTo(this)
 			.end();
 
 		m_info_label = make_factory(CCLabelBMFont::create("From 0%", "bigFont.fnt"))
 			.setOpacity(64)
 			.setScale(0.4f)
+			.setID("from-label"_spr)
 			.addTo(this)
 			.end();
 
+		this->setID("RunInfoWidget"_spr);
 		this->reset_icon("checkpoint_01_001.png");
 
 		this->update_position(layer, pos);
@@ -58,6 +61,7 @@ public:
 		if (m_icon_sprite) m_icon_sprite->removeFromParent();
 		m_icon_sprite = make_factory(CCSprite::createWithSpriteFrameName(str))
 			.setOpacity(64)
+			.setID("icon-sprite"_spr)
 			.addTo(this)
 			.with([&](auto* sprite) {
 				sprite->setScale(m_status_label->getScaledContentSize().height / sprite->getContentSize().height);

@@ -26,11 +26,17 @@ if (WIN32)
 	add_subdirectory(ingame-screenshot)
 endif()
 
+add_subdirectory(run-info)
+
+# TODO: macos still sucks
+if (NOT APPLE)
+
 add_subdirectory(scroll-zoom)
 
 # add_subdirectory(physics-btns)
 add_subdirectory(circle-tool)
 add_subdirectory(reference-image)
-add_subdirectory(run-info)
 # add_subdirectory(song-search)
 add_subdirectory(song-preview)
+
+endif()
