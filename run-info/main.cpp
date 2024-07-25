@@ -222,15 +222,15 @@ class $modify(PlayLayer) {
 
 $on_mod(Loaded) {
 	// migrate old settings to "position"
-	auto container = Mod::get()->getSavedSettingsData();
+	auto& container = Mod::get()->getSavedSettingsData();
 	if (container.contains("position-top") || container.contains("position-left")) {
 		auto top = container.try_get<bool>("position-top").value_or(false);
 		auto left = container.try_get<bool>("position-left").value_or(false);
 		log::debug("Migrating from old settings: top={} left={}", top, left);
 
-		Mod::get()->setSettingValue<std::string>("position", top ? (left ? "Top Left" : "Top Right") : (left ? "Bottom Left" : "Bottom Right"));
-
 		container.erase("position-top");
 		container.erase("position-left");
+
+		Mod::get()->setSettingValue<std::string>("position", top ? (left ? "Top Left" : "Top Right") : (left ? "Bottom Left" : "Bottom Right"));
 	}
 }
