@@ -6,5 +6,7 @@
 	"name": "Quick jump keys",
 	"developer": "mat",
 	"description": "",
-	"repository": "https://github.com/matcool/geode-mods"
+	"links": {
+		"source": "https://github.com/matcool/geode-mods"
+	}
 }

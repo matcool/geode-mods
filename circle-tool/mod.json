@@ -5,7 +5,7 @@
 		"android": "2.2074",
 		"mac": "2.2074"
 	},
-	"version": "v1.2.0",
+	"version": "v1.2.1",
 	"id": "mat.circle-tool",
 	"name": "Circle Tool",
 	"developer": "mat",
@@ -25,5 +25,7 @@
 			]
 		}
 	},
-	"repository": "https://github.com/matcool/geode-mods"
+	"links": {
+		"source": "https://github.com/matcool/geode-mods"
+	}
 }

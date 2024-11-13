@@ -1,5 +1,5 @@
 #include <Geode/loader/Mod.hpp>
-#include <Geode/loader/SettingEvent.hpp>
+#include <Geode/loader/Setting.hpp>
 
 using namespace geode::prelude;
 
@@ -12,6 +12,8 @@ $execute {
 			return result.unwrap();
 		}
 	};
+
+	static_assert(GEODE_COMP_GD_VERSION == 22060, "max-window addresses are outdated!");
 
 	// most of these can be found inside of glfw's WindowProc handler
 
@@ -40,9 +42,9 @@ $execute {
 
 	togglePatches(Mod::get()->getSettingValue<bool>("free-resize"));
 
-	new EventListener([=](bool value) {
+	listenForSettingChanges<bool>("free-resize", [=](bool value) {
 		togglePatches(value);
-	}, GeodeSettingChangedFilter<bool>(getMod()->getID(), "free-resize"));
+	});
 
 	if (Mod::get()->getSettingValue<bool>("start-maximized")) {
 		ShowWindow(GetActiveWindow(), SW_MAXIMIZE);

@@ -5,7 +5,9 @@
 	"name": "Song Search",
 	"developer": "mat",
 	"description": "Easily search through your saved songs.",
-	"repository": "https://github.com/matcool/geode-mods",
+	"links": {
+		"source": "https://github.com/matcool/geode-mods"
+	},
 	"tags": [
 		"offline",
 		"editor",

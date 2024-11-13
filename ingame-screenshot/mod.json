@@ -14,5 +14,7 @@
 		"offline",
 		"utility"
 	],
-	"repository": "https://github.com/matcool/geode-mods"
+	"links": {
+		"source": "https://github.com/matcool/geode-mods"
+	}
 }

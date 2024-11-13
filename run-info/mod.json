@@ -5,7 +5,7 @@
 		"android": "2.2074",
 		"mac": "2.2074"
 	},
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"id": "mat.run-info",
 	"name": "Run Info",
 	"developer": "mat",
@@ -48,7 +48,9 @@
 			"description": "Whether to use the startpos icon for testmode"
 		}
 	},
-	"repository": "https://github.com/matcool/geode-mods",
+	"links": {
+		"source": "https://github.com/matcool/geode-mods"
+	},
 	"tags": [
 		"gameplay",
 		"offline",

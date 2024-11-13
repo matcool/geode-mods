@@ -3,12 +3,14 @@
 	"gd": {
 		"win": "*"
 	},
-	"version": "1.1.2",
+	"version": "1.1.3",
 	"id": "mat.draw-divide",
 	"name": "Draw divide",
 	"developer": "mat",
 	"description": "Makes the game render at native refresh rate, helping perfomance.",
-	"repository": "https://github.com/matcool/geode-mods",
+	"links": {
+		"source": "https://github.com/matcool/geode-mods"
+	},
 	"tags": [
 		"performance",
 		"universal",

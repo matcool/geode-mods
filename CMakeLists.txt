@@ -22,7 +22,7 @@ if (WIN32)
 	add_subdirectory(draw-divide)
 # 	add_subdirectory(jump-key)
 
-	add_subdirectory(max-window)
+	# add_subdirectory(max-window)
 	add_subdirectory(ingame-screenshot)
 endif()
 
@@ -37,6 +37,6 @@ add_subdirectory(scroll-zoom)
 add_subdirectory(circle-tool)
 add_subdirectory(reference-image)
 # add_subdirectory(song-search)
-add_subdirectory(song-preview)
+# add_subdirectory(song-preview)
 
 endif()

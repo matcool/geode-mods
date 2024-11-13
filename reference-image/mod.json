@@ -5,7 +5,7 @@
 		"android": "2.2074",
 		"mac": "2.2074"
 	},
-	"version": "v1.1.0",
+	"version": "v1.1.1",
 	"id": "mat.reference-image",
 	"name": "Reference Image",
 	"developer": "mat",
@@ -22,5 +22,7 @@
 			]
 		}
 	},
-	"repository": "https://github.com/matcool/geode-mods"
+	"links": {
+		"source": "https://github.com/matcool/geode-mods"
+	}
 }
