@@ -1,5 +1,5 @@
 {
-	"geode": "3.3.0",
+	"geode": "4.0.0-alpha.1",
 	"version": "v1.0.0",
 	"id": "mat.song-search",
 	"name": "Song Search",

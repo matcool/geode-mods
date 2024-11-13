@@ -9,7 +9,7 @@
 
 ## 1.1.0
 - Hide info label in platformer mode
-- Port to GD 2.206
+- Port to GD 2.2074
 
 ## 1.0.0
 - Add more options from the original mod

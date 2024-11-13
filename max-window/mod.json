@@ -1,7 +1,7 @@
 {
-	"geode": "3.3.0",
+	"geode": "4.0.0-alpha.1",
 	"gd": {
-		"win": "2.206"
+		"win": "2.2074"
 	},
 	"version": "1.0.4",
 	"id": "mat.max-window",

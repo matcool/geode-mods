@@ -224,8 +224,8 @@ $on_mod(Loaded) {
 	// migrate old settings to "position"
 	auto& container = Mod::get()->getSavedSettingsData();
 	if (container.contains("position-top") || container.contains("position-left")) {
-		auto top = container.try_get<bool>("position-top").value_or(false);
-		auto left = container.try_get<bool>("position-left").value_or(false);
+		auto top = container["position-top"].asBool().unwrapOr(false);
+		auto left = container["position-left"].asBool().unwrapOr(false);
 		log::debug("Migrating from old settings: top={} left={}", top, left);
 
 		container.erase("position-top");
