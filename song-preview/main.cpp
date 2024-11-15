@@ -185,7 +185,7 @@ protected:
 		path = CCFileUtils::get()->fullPathForFilename(path.c_str(), false);
 		
 		auto* engine = FMODAudioEngine::sharedEngine();
-		engine->stopAllMusic();
+		engine->stopAllMusic(true);
 		engine->playMusic(path, false, 0.f, 0);
 
 
@@ -532,7 +532,7 @@ public:
 #include <Geode/modify/CustomSongWidget.hpp>
 class $modify(CustomSongWidget) {
 	void onPlayback(CCObject* sender) {
-		if (LevelEditorLayer::get() && getChildOfType<LevelSettingsLayer>(CCScene::get(), 0)) {
+		if (LevelEditorLayer::get() && CCScene::get()->getChildByType<LevelSettingsLayer>(0)) {
 			DetailedAudioPreviewPopup::create(m_songInfoObject, this)->show();
 		} else {
 			CustomSongWidget::onPlayback(sender);
