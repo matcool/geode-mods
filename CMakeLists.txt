@@ -22,7 +22,7 @@ if (WIN32)
 	add_subdirectory(draw-divide)
 # 	add_subdirectory(jump-key)
 
-	# add_subdirectory(max-window)
+	add_subdirectory(max-window)
 	add_subdirectory(ingame-screenshot)
 endif()
 

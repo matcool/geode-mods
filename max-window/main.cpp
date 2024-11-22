@@ -13,23 +13,23 @@ $execute {
 		}
 	};
 
-	static_assert(GEODE_COMP_GD_VERSION == 22060, "max-window addresses are outdated!");
+	static_assert(GEODE_COMP_GD_VERSION == 22074, "max-window addresses are outdated!");
 
 	// most of these can be found inside of glfw's WindowProc handler
 
 	// inside of WM_SIZING (0x214) case
 	// nops a call to some internal function
-	auto patch1 = unwrapOrWarn(Mod::get()->patch((void*)(base::getCocos() + 0xd6b1a), {0x90, 0x90, 0x90, 0x90, 0x90}));
-	
+	auto patch1 = unwrapOrWarn(Mod::get()->patch((void*)(base::getCocos() + 0xd6eca), {0x90, 0x90, 0x90, 0x90, 0x90}));
+
 	// these both are required for fixing maximize
 
 	// nops a call to SetWindowPos
-	(void) Mod::get()->patch((void*)(base::getCocos() + 0xd4cd9), {0x90, 0x90, 0x90, 0x90, 0x90, 0x90});
+	(void) Mod::get()->patch((void*)(base::getCocos() + 0xd5089), {0x90, 0x90, 0x90, 0x90, 0x90, 0x90});
 
 	// my patches :3
 	// inside of WM_SIZE (5) case, ignore when wParam is SIZE_MAXIMIZED (2)
 	// jnz -> jmp
-	(void) Mod::get()->patch((void*)(base::getCocos() + 0xd61b7), {0x48, 0xe9});
+	(void) Mod::get()->patch((void*)(base::getCocos() + 0xd6567), {0x48, 0xe9});
 
 	const auto togglePatches = [=](bool value) {
 		// truly the code of all time
