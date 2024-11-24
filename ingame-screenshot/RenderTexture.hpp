@@ -34,8 +34,12 @@ class RenderTexture {
 	GLuint m_texture = 0;
 	float m_oldScaleX = 0;
 	float m_oldScaleY = 0;
+	bool m_fbActive = false;
+
+	cocos2d::CCTexture2D* asTexture();
 public:
-	RenderTexture(unsigned width, unsigned height);
+	RenderTexture(unsigned int width, unsigned int height);
+	RenderTexture(RenderTexture&&);
 	~RenderTexture();
 
 	enum class PixelFormat {
@@ -46,12 +50,12 @@ public:
 	};
 
 	// begin, visit, end a node
-	std::unique_ptr<uint8_t[]> capture(cocos2d::CCNode* node, PixelFormat format = PixelFormat::RGBA);
+	void capture(cocos2d::CCNode* node, PixelFormat format = PixelFormat::RGBA);
+	std::unique_ptr<uint8_t[]> captureData(cocos2d::CCNode* node, PixelFormat format = PixelFormat::RGBA);
 
 	void begin();
 	void end();
 
-	// must be called before end because my code sucks
 	std::unique_ptr<uint8_t[]> readDataFromTexture(PixelFormat format = PixelFormat::RGBA);
 
 	GLuint getTexture() const { return m_texture; }
@@ -59,4 +63,24 @@ public:
 	// creates a CCTexture2D from the internal texture. this class should not be used after this
 	// as cocos now owns the texture, and a new one isnt created
 	cocos2d::CCTexture2D* intoTexture();
+
+	class Sprite;
+
+	// creates a CCSprite from this texture, while keeping the texture alive. this class should not be used after this,
+	// use return->render instead
+	std::shared_ptr<Sprite> intoManagedSprite();
+};
+
+class RenderTexture::Sprite {
+	Sprite(const Sprite&) = delete;
+	Sprite& operator=(const Sprite&) = delete;
+public:
+	Sprite(RenderTexture texture);
+	~Sprite();
+
+	// these two must live together since they both share an opengl texture
+	// and thus both will try to delete it
+
+	geode::Ref<cocos2d::CCSprite> sprite;
+	RenderTexture render;
 };

@@ -40,6 +40,20 @@ RenderTexture::RenderTexture(unsigned int width, unsigned int height)
 	glBindFramebuffer(GL_FRAMEBUFFER, m_oldFBO);
 }
 
+RenderTexture::RenderTexture(RenderTexture&& other) {
+	m_oldFBO = std::exchange(other.m_oldFBO, 0);
+	m_oldRBO = std::exchange(other.m_oldRBO, 0);
+	m_fbo = std::exchange(other.m_fbo, 0);
+	m_depthStencil = std::exchange(other.m_depthStencil, 0);
+	m_texture = std::exchange(other.m_texture, 0);
+
+	// no need to reset these on other
+	m_width = other.m_width;
+	m_height = other.m_height;
+	m_oldScaleX = other.m_oldScaleX;
+	m_oldScaleY = other.m_oldScaleY;
+}
+
 RenderTexture::~RenderTexture() {
 	if (m_fbo) glDeleteFramebuffers(1, &m_fbo);
 	if (m_texture) glDeleteTextures(1, &m_texture);
@@ -62,6 +76,7 @@ void RenderTexture::begin() {
 	
 	glViewport(0, 0, m_width, m_height);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	m_fbActive = true;
 
 	// idk either tbh i just copied it from drawScene
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -75,13 +90,20 @@ void RenderTexture::end() {
 	glBindRenderbuffer(GL_RENDERBUFFER, m_oldRBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, m_oldFBO);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	m_fbActive = false;
 
 	glview->m_fScaleX = m_oldScaleX;
 	glview->m_fScaleY = m_oldScaleY;
 	director->setViewport();
 }
 
-std::unique_ptr<uint8_t[]> RenderTexture::capture(CCNode* node, PixelFormat format) {
+void RenderTexture::capture(CCNode* node, PixelFormat format) {
+	this->begin();
+	node->visit();
+	this->end();
+}
+
+std::unique_ptr<uint8_t[]> RenderTexture::captureData(CCNode* node, PixelFormat format) {
 	this->begin();
 	node->visit();
 	auto data = this->readDataFromTexture(format);
@@ -112,9 +134,18 @@ std::unique_ptr<uint8_t[]> RenderTexture::readDataFromTexture(PixelFormat format
 	}
 
 	auto pixels = std::make_unique<uint8_t[]>(m_width * m_height * perPixel);
+	if (!m_fbActive) {
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &m_oldFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+	}
+
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glBindTexture(GL_TEXTURE_2D, m_texture);
 	glReadPixels(0, 0, m_width, m_height, glFormat, GL_UNSIGNED_BYTE, pixels.get());
+
+	if (!m_fbActive) {
+		glBindFramebuffer(GL_FRAMEBUFFER, m_oldFBO);
+	}
     
 	return pixels;
 }
@@ -138,12 +169,29 @@ struct HackCCTexture2D : CCTexture2D {
 	}
 };
 
-CCTexture2D* RenderTexture::intoTexture() {
-	auto texture = new CCTexture2D();
+CCTexture2D* RenderTexture::asTexture() {
+	auto* texture = new CCTexture2D();
 	static_cast<HackCCTexture2D*>(texture)->initWithGLName(
 		m_texture, m_width, m_height, CCSize(m_width, m_height)
 	);
 	texture->autorelease();
+	return texture;
+}
+
+CCTexture2D* RenderTexture::intoTexture() {
+	auto* texture = this->asTexture();
 	m_texture = 0;
 	return texture;
+}
+
+std::shared_ptr<RenderTexture::Sprite> RenderTexture::intoManagedSprite() {
+	return std::make_shared<Sprite>(std::move(*this));
+}
+
+RenderTexture::Sprite::Sprite(RenderTexture texture) : render(std::move(texture)) {
+	sprite = CCSprite::createWithTexture(render.asTexture());
+}
+RenderTexture::Sprite::~Sprite() {
+	// let CCSprite delete the texture
+	render.m_texture = 0;
 }

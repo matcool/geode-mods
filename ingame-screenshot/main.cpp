@@ -151,7 +151,7 @@ class $modify(CCKeyboardDispatcher) {
 
 			auto captureSize = CCSize(1920, 1080);
 			RenderTexture texture(captureSize.width, captureSize.height);
-			auto data = texture.capture(scene);
+			auto data = texture.captureData(scene);
 
 			if (director->getKeyboardDispatcher()->getShiftKeyPressed()) {
 				ImageAreaSelectLayer::create(texture.intoTexture(), std::move(data))->show();
