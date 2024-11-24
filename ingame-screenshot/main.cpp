@@ -6,15 +6,19 @@ using namespace geode::prelude;
 // #include <CCGL.h>
 #include <thread>
 
-void copy_screenshot(std::unique_ptr<uint8_t[]> data, const CCSize& size, int x = 0, int y = 0, int a = 0, int b = 0) {
+void copy_screenshot(std::unique_ptr<uint8_t[]> data, const CCSize& size, int startX = 0, int startY = 0, int endX = 0, int endY = 0) {
 	const auto width = static_cast<int>(size.width);
 	const auto height = static_cast<int>(size.height);
+	if (endX == 0) endX = width;
+	if (endY == 0) endY = height;
+	const auto newWidth = endX - startX;
+	const auto newHeight = endY - startY;
 	std::thread([=, data = std::move(data)]() {
-		auto newData = std::make_unique<uint8_t[]>(width * height * 4);
-		for (int y = 0; y < height; ++y) {
-			for (int x = 0; x < width; ++x) {
-				auto i = (y * width + x) * 4;
-				auto newIndex = ((height - y - 1) * width + x) * 4;
+		auto newData = std::make_unique<uint8_t[]>(newWidth * newHeight * 4);
+		for (int y = startY; y < endY; ++y) {
+			for (int x = startX; x < endX; ++x) {
+				auto i = ((height - y - 1) * width + x) * 4;
+				auto newIndex = ((y - startY) * newWidth + (x - startX)) * 4;
 				// RGBA -> BGRA
 				newData[newIndex + 0] = data[i + 2];
 				newData[newIndex + 1] = data[i + 1];
@@ -23,7 +27,7 @@ void copy_screenshot(std::unique_ptr<uint8_t[]> data, const CCSize& size, int x 
 			}
 		}
 
-		auto bitmap = CreateBitmap(width, height, 1, 32, newData.get());
+		auto bitmap = CreateBitmap(newWidth, newHeight, 1, 32, newData.get());
 
 		if (OpenClipboard(NULL))
 			if (EmptyClipboard()) {
@@ -33,7 +37,6 @@ void copy_screenshot(std::unique_ptr<uint8_t[]> data, const CCSize& size, int x 
 	}).detach();
 }
 
-#if 0
 class ImageAreaSelectLayer : public FLAlertLayer {
 	std::unique_ptr<uint8_t[]> m_data;
 	CCSize m_texture_size;
@@ -52,7 +55,8 @@ class ImageAreaSelectLayer : public FLAlertLayer {
 
 		auto sprite = CCSprite::createWithTexture(texture2d);
 		sprite->setPosition(winSize / 2);
-		sprite->setScale(0.75f);
+		sprite->setScale(winSize.width / sprite->getContentWidth() * 0.9f);
+		sprite->setFlipY(true);
 		m_mainLayer->addChild(sprite);
 
 		{
@@ -114,10 +118,10 @@ class ImageAreaSelectLayer : public FLAlertLayer {
 			if (bf > yf) std::swap(yf, bf);
 			const auto width = m_texture_size.width;
 			const auto height = m_texture_size.height;
-			uint x = static_cast<uint>(std::clamp(xf * width, 0.f, width));
-			uint y = static_cast<uint>(std::clamp((1.f - yf) * height, 0.f, height));
-			uint a = static_cast<uint>(std::clamp(af * width, 0.f, width));
-			uint b = static_cast<uint>(std::clamp((1.f - bf) * height, 0.f, height));
+			unsigned x = static_cast<unsigned>(std::clamp(xf * width, 0.f, width));
+			unsigned y = static_cast<unsigned>(std::clamp((1.f - yf) * height, 0.f, height));
+			unsigned a = static_cast<unsigned>(std::clamp(af * width, 0.f, width));
+			unsigned b = static_cast<unsigned>(std::clamp((1.f - bf) * height, 0.f, height));
 			copy_screenshot(std::move(m_data), m_texture_size, x, y, a, b);
 			this->keyBackClicked();
 		}
@@ -135,7 +139,6 @@ public:
 		return ret;
 	}
 };
-#endif
 
 #include <Geode/modify/CCKeyboardDispatcher.hpp>
 class $modify(CCKeyboardDispatcher) {
@@ -150,15 +153,11 @@ class $modify(CCKeyboardDispatcher) {
 			RenderTexture texture(captureSize.width, captureSize.height);
 			auto data = texture.capture(scene);
 
-			auto* ctexture = texture.intoTexture();
-
-			#if 0
 			if (director->getKeyboardDispatcher()->getShiftKeyPressed()) {
-				// doesnt work :(
-				ImageAreaSelectLayer::create(ctexture, std::move(data))->show();
+				ImageAreaSelectLayer::create(texture.intoTexture(), std::move(data))->show();
+			} else {
+				copy_screenshot(std::move(data), captureSize);
 			}
-			#endif
-			copy_screenshot(std::move(data), captureSize);
 		}
 		return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down, repeat);
 	}
