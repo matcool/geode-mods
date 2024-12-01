@@ -165,6 +165,8 @@ protected:
 	CCSize m_widgetSize;
 	CCSize m_barSize;
 	CustomSongWidget* m_parentWidget = nullptr;
+	CCMenuItemSpriteExtra* m_playButton = nullptr;
+	bool m_isAlreadyChosenSong = false;
 
 	EventListener<SampleInfo::SampleTask> m_sampleTaskListener;
 
@@ -175,8 +177,10 @@ protected:
 		m_parentWidget = parent;
 
 		if (auto* editor = LevelEditorLayer::get()) {
-			if (editor->m_level->m_songID == m_songID)
+			if (editor->m_level->m_songID == m_songID) {
 				m_startOffset = editor->m_levelSettings->m_songOffset;
+				m_isAlreadyChosenSong = true;
+			}
 		}
 
         auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -271,11 +275,12 @@ protected:
 						->setAutoGrowAxis(1.f)
 						->setGap(0.f)
 					)
-					.child(Build<CCSprite>::createSpriteName("GJ_undoBtn_001.png")
+					.child(Build(CircleButtonSprite::createWithSprite("back.png"_spr, 1.f, CircleBaseColor::Green, CircleBaseSize::Small))
 						.intoMenuItem(this, menu_selector(DetailedAudioPreviewPopup::onGoToStartOffset))
 					)
-					.child(Build<CCSprite>::createSpriteName("GJ_playMusicBtn_001.png")
+					.child(Build<CCSprite>::createSpriteName("GJ_pauseBtn_001.png")
 						.intoMenuItem(this, menu_selector(DetailedAudioPreviewPopup::onPlay))
+						.store(m_playButton)
 					)
 					.updateLayout()
 				)
@@ -474,11 +479,15 @@ protected:
 	void onPlay(CCObject*) {
 		auto path = MusicDownloadManager::sharedState()->pathForSong(m_songID);
 		auto* engine = FMODAudioEngine::sharedEngine();
+		const char* sprite;
 		if (engine->isMusicPlaying(0)) {
 			engine->pauseMusic(0);
+			sprite = "GJ_playMusicBtn_001.png";
 		} else {
 			engine->playMusic(path, false, 0.f, 0);
+			sprite = "GJ_pauseBtn_001.png";
 		}
+		m_playButton->setNormalImage(CCSprite::createWithSpriteFrameName(sprite));
 	}
 
 	void onGoToStartOffset(CCObject*) {
@@ -494,6 +503,14 @@ protected:
 			m_parentWidget->onSelect(nullptr);
 		}
 		this->onClose(nullptr);
+	}
+
+	void onClose(CCObject* obj) override {
+		if (auto* editor = LevelEditorLayer::get(); editor && m_isAlreadyChosenSong) {
+			editor->m_levelSettings->m_songOffset = m_startOffset;
+		}
+
+		Popup::onClose(obj);
 	}
 
     void textChanged(CCTextInputNode* input) override {

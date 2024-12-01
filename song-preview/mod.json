@@ -5,7 +5,7 @@
 		"android": "2.2074",
 		"mac": "2.2074"
 	},
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"id": "mat.song-preview",
 	"name": "Advanced Song Preview",
 	"developer": "mat",
@@ -18,7 +18,7 @@
 	],
 	"resources": {
 		"sprites": [
-			"res/cursor.png"
+			"res/*.png"
 		]
 	},
 	"links": {
