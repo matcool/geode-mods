@@ -335,7 +335,7 @@ protected:
 			.anchorPoint(0.5, 0.5)
 			.layout(ColumnLayout::create()
 				->setAxisAlignment(AxisAlignment::End)
-				->setCrossAxisLineAlignment(AxisAlignment::Start)
+				->setCrossAxisLineAlignment(AxisAlignment::Center)
 				->setAxisReverse(true)
 				->setGrowCrossAxis(true)
 				->setAutoGrowAxis(1.f)
