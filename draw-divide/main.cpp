@@ -25,8 +25,10 @@ double get_refresh_rate() {
 	return refresh_rate;
 }
 
-double delta_count = 0.0;
-bool enabled = true;
+double g_delta_count = 0.0;
+bool g_enabled = true;
+bool g_force_target_fps = false;
+int g_force_fps = 60;
 
 // #define DEBUG_FPS
 
@@ -39,17 +41,16 @@ double total_time = 0.0;
 #include <Geode/modify/CCDirector.hpp>
 class $modify(CCDirector) {
 	void drawScene() {
-		// disable for first 300 frames of game being open
-		if (!enabled || this->getTotalFrames() < 300) {
+		// disable for first 150 frames of game being open
+		if (!g_enabled || this->getTotalFrames() < 150) {
 			return CCDirector::drawScene();
 		}
 
-		// always target the refresh rate of the monitor
-		const double target_fps = get_refresh_rate();
+		const double target_fps = g_force_target_fps ? static_cast<double>(g_force_fps) : get_refresh_rate();
 
 		const double target_delta = 1.0 / target_fps;
 
-		delta_count += this->getActualDeltaTime();
+		g_delta_count += this->getActualDeltaTime();
 
 #ifdef DEBUG_FPS
 		++count_total;
@@ -57,9 +58,9 @@ class $modify(CCDirector) {
 #endif
 
 		// run full scene draw (glClear, visit) each time the counter is full
-		if (delta_count >= target_delta) {
+		if (g_delta_count >= target_delta) {
 			// keep left over
-			delta_count -= target_delta;
+			g_delta_count -= target_delta;
 #ifdef DEBUG_FPS
 			++count_render;
 #endif
@@ -89,3 +90,15 @@ class $modify(CCDirector) {
 		}
 	}
 };
+
+$on_mod(Loaded) {
+	listenForSettingChanges("enabled", [](bool value) {
+		g_enabled = value;
+	});
+	listenForSettingChanges("override-visual-fps", [](bool value) {
+		g_force_target_fps = value;
+	});
+	listenForSettingChanges("visual-fps", [](int value) {
+		g_force_fps = value;
+	});
+}

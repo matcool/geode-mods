@@ -3,10 +3,10 @@
 	"gd": {
 		"win": "*"
 	},
-	"version": "1.1.3",
+	"version": "1.2.0",
 	"id": "mat.draw-divide",
 	"name": "Draw divide",
-	"developer": "mat",
+	"developers": ["zmx", "mat"],
 	"description": "Makes the game render at native refresh rate, helping perfomance.",
 	"links": {
 		"source": "https://github.com/matcool/geode-mods"
@@ -15,5 +15,26 @@
 		"performance",
 		"universal",
 		"offline"
-	]
+	],
+	"settings": {
+		"enabled": {
+			"name": "Enabled",
+			"type": "bool",
+			"default": true,
+			"description": "Enable the mod"
+		},
+		"override-visual-fps": {
+			"name": "Override Visual FPS",
+			"type": "bool",
+			"default": false,
+			"description": "Override the target visual FPS, instead of targetting monitor refresh rate"
+		},
+		"visual-fps": {
+			"name": "Visual FPS",
+			"type": "int",
+			"default": 60,
+			"min": 1,
+			"enable-if": "override-visual-fps"
+		}
+	}
 }
