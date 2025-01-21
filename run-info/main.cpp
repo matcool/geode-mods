@@ -89,6 +89,8 @@ public:
 				sprite->setScale(m_status_label->getScaledContentSize().height / sprite->getContentSize().height);
 			})
 			.end();
+		// make cocos cascade the opacity lol
+		this->setOpacity(this->getOpacity());
 	}
 
 	void update_position(PlayLayer* layer, bool left) {

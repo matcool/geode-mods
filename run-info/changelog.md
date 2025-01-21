@@ -1,3 +1,6 @@
+## 2.0.1
+- Fix opacity not being applied to icon
+
 ## 2.0.0
 - Add setting to toggle the mod
 - Add setting to enable decimal percentages
