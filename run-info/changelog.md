@@ -1,3 +1,9 @@
+## 2.0.0
+- Add setting to toggle the mod
+- Add setting to enable decimal percentages
+- Add setting to change opacity, scale and color
+- Add setting to put "From %" text on same line
+
 ## 1.2.1
 - Fix setting migration not deleting old values
 - Add changelog
