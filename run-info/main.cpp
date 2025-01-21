@@ -141,6 +141,8 @@ class $modify(PlayLayer) {
 	bool init(GJGameLevel* level, bool unk1, bool unk2) {
 		if (!PlayLayer::init(level, unk1, unk2)) return false;
 
+		if (!Mod::get()->getSettingValue<bool>("enabled")) return true;
+
 		// removes the testmode label gd creates
 		if (this->getChildrenCount()) {
 			CCArrayExt<CCNode*> children = this->getChildren();
@@ -177,7 +179,7 @@ class $modify(PlayLayer) {
 	}
 
 	void update_position(bool top, bool left) {
-		if (!m_fields->m_widget) return;
+		if (!m_fields->m_widget || !Mod::get()->getSettingValue<bool>("enabled")) return;
 
 		auto* widget = m_fields->m_widget;
 
@@ -214,7 +216,7 @@ class $modify(PlayLayer) {
 	}
 
 	void update_labels() {
-		if (!m_fields->m_widget) return;
+		if (!m_fields->m_widget || !Mod::get()->getSettingValue<bool>("enabled")) return;
 		m_fields->m_widget->update_labels(this, m_fields->m_initial_percent);
 		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
 	}
@@ -224,8 +226,8 @@ $on_mod(Loaded) {
 	// migrate old settings to "position"
 	auto& container = Mod::get()->getSavedSettingsData();
 	if (container.contains("position-top") || container.contains("position-left")) {
-		auto top = container["position-top"].asBool().unwrapOr(false);
-		auto left = container["position-left"].asBool().unwrapOr(false);
+		auto top = container["position-top"].asBool().unwrapOr(true);
+		auto left = container["position-left"].asBool().unwrapOr(true);
 		log::debug("Migrating from old settings: top={} left={}", top, left);
 
 		container.erase("position-top");
