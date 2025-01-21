@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
 
 using namespace geode::prelude;
+using namespace std::string_literals;
 
 #include <Geode/modify/EditorUI.hpp>
 class $modify(MyEditorUI, EditorUI) {
@@ -20,6 +21,16 @@ class $modify(MyEditorUI, EditorUI) {
 					m_fields->m_sprite->removeFromParent();
 					m_fields->m_sprite = nullptr;
 				}
+				#ifdef GEODE_IS_WINDOWS
+				try {
+					(void) path.string();
+				} catch (...) {
+					// copy file to mod temp dir, which is guaranteed to be within the codepage
+					auto newPath = Mod::get()->getTempDir() / ("temp_ref_img"s + path.extension().string());
+					std::filesystem::copy_file(path, newPath, std::filesystem::copy_options::overwrite_existing);
+					path = newPath;
+				}
+				#endif
 				auto* sprite = CCSprite::create(path.string().c_str());
 				if (sprite || !sprite->getUserObject("geode.texture-loader/fallback")) {
 					m_fields->m_sprite = sprite;
