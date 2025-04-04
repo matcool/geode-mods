@@ -32,7 +32,6 @@ endif()
 
 add_subdirectory(run-info)
 
-# TODO: macos still sucks
 # if (NOT APPLE)
 
 add_subdirectory(scroll-zoom)
