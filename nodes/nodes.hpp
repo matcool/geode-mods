@@ -25,6 +25,13 @@ public:
 
 	virtual void textChanged(CCTextInputNode*);
 
+	~TextInputNode() {
+		if (input_node) {
+			input_node->onClickTrackNode(false);
+			input_node->setDelegate(nullptr);
+		}
+	}
+
 	void set_value(const std::string& value);
 	std::string get_value();
 };
