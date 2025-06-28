@@ -3,7 +3,8 @@
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074",
-		"mac": "2.2074"
+		"mac": "2.2074",
+		"ios": "2.2074"
 	},
 	"version": "v1.1.2",
 	"id": "mat.reference-image",
