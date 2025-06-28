@@ -142,6 +142,8 @@ public:
 		}
 
 		auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
+		float decimalPow = std::pow(10.0f, static_cast<float>(decimal));
+		percent = std::floor(percent * decimalPow) / decimalPow;
 
 		m_info_label->setString(fmt::format("From {0:.{1}f}%", percent, decimal).c_str());
 
@@ -255,15 +257,18 @@ class $modify(PlayLayer) {
 			return;
 		auto from = m_fields->m_initial_percent;
 		auto to = this->getCurrentPercent();
-		if (m_fields->m_show_in_percentage) {
-			auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
-			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, from, to).c_str());
-		}
 		if (m_fields->m_show_in_progress_bar) {
 			float x = from / 100.0f * m_progressWidth;
 			float width = (to - from) / 100.0f * m_progressWidth;
 			m_progressFill->setTextureRect({ x, 0.0f, width, m_progressHeight });
 			m_progressFill->setPositionX(2.0f + x);
+		}
+		if (m_fields->m_show_in_percentage) {
+			auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
+			float decimalPow = std::pow(10.0f, static_cast<float>(decimal));
+			from = std::floor(from * decimalPow) / decimalPow;
+			to = std::floor(to * decimalPow) / decimalPow;
+			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, from, to).c_str());
 		}
 	}
 };
