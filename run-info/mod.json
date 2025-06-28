@@ -1,11 +1,12 @@
 {
-	"geode": "4.2.0",
+	"geode": "4.6.2",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074",
-		"mac": "2.2074"
+		"mac": "2.2074",
+		"ios": "2.2074"
 	},
-	"version": "2.0.1",
+	"version": "2.1.0",
 	"id": "mat.run-info",
 	"name": "Run Info",
 	"developer": "mat",
