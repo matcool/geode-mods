@@ -67,6 +67,12 @@
 			"default": true,
 			"description": "Shows from which % the current run is from"
 		},
+		"show-in-percentage": {
+			"name": "Show in percentage",
+			"type": "bool",
+			"default": false,
+			"description": "Shows the current run in the main \"x%\" text at the top, e.g. \"3-57%\""
+		},
 		"use-start-pos": {
 			"name": "Use startpos icon",
 			"type": "bool",
