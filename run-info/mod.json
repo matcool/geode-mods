@@ -73,6 +73,12 @@
 			"default": false,
 			"description": "Shows the current run in the main \"x%\" text at the top, e.g. \"3-57%\""
 		},
+		"show-in-progress-bar": {
+			"name": "Show in progress bar",
+			"type": "bool",
+			"default": false,
+			"description": "Shows the starting % of the current run in the progress bar"
+		},
 		"use-start-pos": {
 			"name": "Use startpos icon",
 			"type": "bool",

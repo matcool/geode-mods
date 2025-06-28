@@ -156,6 +156,7 @@ class $modify(PlayLayer) {
 		RunInfoWidget* m_widget = nullptr;
 		float m_initial_percent = 0;
 		bool m_show_in_percentage = false;
+		bool m_show_in_progress_bar = false;
 	};
 
 	bool init(GJGameLevel* level, bool unk1, bool unk2) {
@@ -164,6 +165,7 @@ class $modify(PlayLayer) {
 		if (!Mod::get()->getSettingValue<bool>("enabled")) return true;
 
 		m_fields->m_show_in_percentage = Mod::get()->getSettingValue<bool>("show-in-percentage");
+		m_fields->m_show_in_progress_bar = Mod::get()->getSettingValue<bool>("show-in-progress-bar");
 
 		// removes the testmode label gd creates
 		if (this->getChildrenCount()) {
@@ -251,11 +253,17 @@ class $modify(PlayLayer) {
 		PlayLayer::updateProgressbar();
 		if (m_isPlatformer || !(m_isPracticeMode || m_isTestMode))
 			return;
+		auto from = m_fields->m_initial_percent;
+		auto to = this->getCurrentPercent();
 		if (m_fields->m_show_in_percentage) {
 			auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
-			auto from = m_fields->m_initial_percent;
-			auto to = this->getCurrentPercent();
 			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, from, to).c_str());
+		}
+		if (m_fields->m_show_in_progress_bar) {
+			float x = from / 100.0f * m_progressWidth;
+			float width = (to - from) / 100.0f * m_progressWidth;
+			m_progressFill->setTextureRect({ x, 0.0f, width, m_progressHeight });
+			m_progressFill->setPositionX(2.0f + x);
 		}
 	}
 };
