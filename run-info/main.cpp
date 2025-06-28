@@ -141,13 +141,9 @@ public:
 			m_was_practice = false;
 		}
 
-		bool decimal = Mod::get()->getSettingValue<bool>("use-decimal");
+		auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
 
-		if (decimal) {
-			m_info_label->setString(fmt::format("From {:.2f}%", percent).c_str());
-		} else {
-			m_info_label->setString(fmt::format("From {}%", int(percent)).c_str());
-		}
+		m_info_label->setString(fmt::format("From {0:.{1}f}%", percent, decimal).c_str());
 
 		m_top_layout->updateLayout();
 		this->updateLayout();
@@ -261,5 +257,13 @@ $on_mod(Loaded) {
 		container.erase("position-left");
 
 		Mod::get()->setSettingValue<std::string>("position", top ? (left ? "Top Left" : "Top Right") : (left ? "Bottom Left" : "Bottom Right"));
+	}
+	if (container.contains("use-decimal")) {
+		auto useDecimals = container["use-decimal"].asBool().unwrapOr(false);
+		log::debug("Migrating from old settings: use-decimal={}", useDecimals);
+
+		container.erase("use-decimal");
+
+		Mod::get()->setSettingValue<int64_t>("decimal-places", useDecimals ? 2 : 0);
 	}
 }
