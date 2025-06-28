@@ -24,13 +24,13 @@
 			"type": "int",
 			"default": 0,
 			"min": 0,
-			"max": 9,
+			"max": 4,
 			"control": {
 				"arrows": true,
 				"arrow-step": 1,
 				"big-arrows": false,
 				"slider": false,
-				"input": true
+				"input": false
 			}
 		},
 		"position": {
