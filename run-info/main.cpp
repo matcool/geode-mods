@@ -6,11 +6,10 @@
 
 using namespace geode::prelude;
 
-constexpr float pow10(const int64_t power) {
-	if (power < 0 || power > 4)
-		return 1.0f;
-	constexpr std::array powersOfTen{ 1.0f, 10.0f, 100.0f, 1'000.0f, 10'000.0f };
-	return powersOfTen[power];
+template <typename Precision>
+constexpr float truncf(const float x, Precision precision) {
+	constexpr std::array powersOfTen{ 1.0f, 10.0f, 100.0f, 1000.0f, 10000.0f };
+	return std::floorf(x * powersOfTen[precision]) / powersOfTen[precision];
 }
 
 class RunInfoWidget : public CCNodeRGBA {
@@ -149,9 +148,8 @@ public:
 		}
 
 		auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
-		percent = std::floor(percent * pow10(decimal)) / pow10(decimal);
-
-		m_info_label->setString(fmt::format("From {0:.{1}f}%", percent, decimal).c_str());
+		percent = truncf(percent, decimal);
+		m_info_label->setString(fmt::format("From {1:.{0}f}%", decimal, percent).c_str());
 
 		m_top_layout->updateLayout();
 		this->updateLayout();
@@ -259,21 +257,20 @@ class $modify(PlayLayer) {
 
 	void updateProgressbar() {
 		PlayLayer::updateProgressbar();
-		if (m_isPlatformer || !(m_isPracticeMode || m_isTestMode))
-			return;
+		if (m_isPlatformer || !(m_isPracticeMode || m_isTestMode)) return;
 		auto from = m_fields->m_initial_percent;
 		auto to = this->getCurrentPercent();
+		if (m_fields->m_show_in_percentage) {
+			auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
+			float fromTr = truncf(from, decimal);
+			float toTr = truncf(to, decimal);
+			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, fromTr, toTr).c_str());
+		}
 		if (m_fields->m_show_in_progress_bar) {
 			float x = from / 100.0f * m_progressWidth;
 			float width = (to - from) / 100.0f * m_progressWidth;
 			m_progressFill->setTextureRect({ x, 0.0f, width, m_progressHeight });
 			m_progressFill->setPositionX(2.0f + x);
-		}
-		if (m_fields->m_show_in_percentage) {
-			auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
-			from = std::floor(from * pow10(decimal)) / pow10(decimal);
-			to = std::floor(to * pow10(decimal)) / pow10(decimal);
-			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, from, to).c_str());
 		}
 	}
 };
