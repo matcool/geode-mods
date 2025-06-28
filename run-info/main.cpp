@@ -2,9 +2,14 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <nodes.hpp>
 #include <fmt/core.h>
-#include <string_view>
+#include <array>
 
 using namespace geode::prelude;
+
+constexpr std::array powersOfTen{
+	1.0f, 10.0f, 100.0f, 1'000.0f, 10'000.0f, 100'000.0f, 1'000'000.0f, // 0-6
+	10'000'000.0f, 100'000'000.0f, 1'000'000'000.0f // 7-9
+};
 
 class RunInfoWidget : public CCNodeRGBA {
 public:
@@ -142,7 +147,7 @@ public:
 		}
 
 		auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
-		float decimalPow = std::pow(10.0f, static_cast<float>(decimal));
+		auto decimalPow = powersOfTen[std::clamp<int64_t>(decimal, 0, 9)];
 		percent = std::floor(percent * decimalPow) / decimalPow;
 
 		m_info_label->setString(fmt::format("From {0:.{1}f}%", percent, decimal).c_str());
@@ -265,7 +270,7 @@ class $modify(PlayLayer) {
 		}
 		if (m_fields->m_show_in_percentage) {
 			auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
-			float decimalPow = std::pow(10.0f, static_cast<float>(decimal));
+			auto decimalPow = powersOfTen[std::clamp<int64_t>(decimal, 0, 9)];
 			from = std::floor(from * decimalPow) / decimalPow;
 			to = std::floor(to * decimalPow) / decimalPow;
 			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, from, to).c_str());
