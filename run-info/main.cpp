@@ -203,18 +203,18 @@ class $modify(PlayLayer) {
 		return true;
 	}
 
+	void update_labels() {
+		if (!m_fields->m_widget || !Mod::get()->getSettingValue<bool>("enabled")) return;
+		m_fields->m_widget->update_labels(this, m_fields->m_initial_percent);
+		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
+	}
+
 	void update_position() {
 		auto const position = Mod::get()->getSettingValue<std::string>("position");
 		this->update_position(
 			position == "Top Left" || position == "Top Right",
 			position == "Top Left" || position == "Bottom Left"
 		);
-	}
-
-	void update_labels() {
-		if (!m_fields->m_widget || !Mod::get()->getSettingValue<bool>("enabled")) return;
-		m_fields->m_widget->update_labels(this, m_fields->m_initial_percent);
-		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
 	}
 
 	void update_position(bool top, bool left) {
