@@ -6,10 +6,9 @@
 
 using namespace geode::prelude;
 
-template <typename Precision>
-constexpr float truncf(const float x, Precision precision) {
-	constexpr std::array powersOfTen{ 1.0f, 10.0f, 100.0f, 1000.0f, 10000.0f };
-	return std::floorf(x * powersOfTen[precision]) / powersOfTen[precision];
+constexpr float truncate(float x, int precision) {
+	constexpr std::array powers { 1.0f, 10.0f, 100.0f, 1000.0f, 10000.0f };
+	return std::floorf(x * powers[precision]) / powers[precision];
 }
 
 class RunInfoWidget : public CCNodeRGBA {
@@ -147,8 +146,8 @@ public:
 			m_was_practice = false;
 		}
 
-		auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
-		percent = truncf(percent, decimal);
+		int decimal = Mod::get()->getSettingValue<int>("decimal-places");
+		percent = truncate(percent, decimal);
 		m_info_label->setString(fmt::format("From {1:.{0}f}%", decimal, percent).c_str());
 
 		m_top_layout->updateLayout();
@@ -204,18 +203,18 @@ class $modify(PlayLayer) {
 		return true;
 	}
 
-	void update_labels() {
-		if (!m_fields->m_widget || !Mod::get()->getSettingValue<bool>("enabled")) return;
-		m_fields->m_widget->update_labels(this, m_fields->m_initial_percent);
-		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
-	}
-
 	void update_position() {
 		auto const position = Mod::get()->getSettingValue<std::string>("position");
 		this->update_position(
 			position == "Top Left" || position == "Top Right",
 			position == "Top Left" || position == "Bottom Left"
 		);
+	}
+
+	void update_labels() {
+		if (!m_fields->m_widget || !Mod::get()->getSettingValue<bool>("enabled")) return;
+		m_fields->m_widget->update_labels(this, m_fields->m_initial_percent);
+		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
 	}
 
 	void update_position(bool top, bool left) {
@@ -257,16 +256,22 @@ class $modify(PlayLayer) {
 
 	void updateProgressbar() {
 		PlayLayer::updateProgressbar();
-		if (m_isPlatformer || !(m_isPracticeMode || m_isTestMode)) return;
+
+		if (m_isPlatformer) return;
+		if (!(m_isPracticeMode || m_isTestMode)) return;
+		if (!Mod::get()->getSettingValue<bool>("enabled")) return;
+
 		auto from = m_fields->m_initial_percent;
 		auto to = this->getCurrentPercent();
-		if (m_fields->m_show_in_percentage) {
-			auto decimal = Mod::get()->getSettingValue<int64_t>("decimal-places");
-			float fromTr = truncf(from, decimal);
-			float toTr = truncf(to, decimal);
-			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, fromTr, toTr).c_str());
+
+		if (m_percentageLabel && m_fields->m_show_in_percentage) {
+			int decimal = Mod::get()->getSettingValue<int>("decimal-places");
+			auto from_trunc = truncate(from, decimal);
+			auto to_trunc = truncate(to, decimal);
+			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, from_trunc, to_trunc).c_str());
 		}
-		if (m_fields->m_show_in_progress_bar) {
+
+		if (m_progressFill && m_fields->m_show_in_progress_bar) {
 			float x = from / 100.0f * m_progressWidth;
 			float width = (to - from) / 100.0f * m_progressWidth;
 			m_progressFill->setTextureRect({ x, 0.0f, width, m_progressHeight });
@@ -289,11 +294,11 @@ $on_mod(Loaded) {
 		Mod::get()->setSettingValue<std::string>("position", top ? (left ? "Top Left" : "Top Right") : (left ? "Bottom Left" : "Bottom Right"));
 	}
 	if (container.contains("use-decimal")) {
-		auto useDecimals = container["use-decimal"].asBool().unwrapOr(false);
-		log::debug("Migrating from old settings: use-decimal={}", useDecimals);
+		auto use_decimal = container["use-decimal"].asBool().unwrapOr(false);
+		log::debug("Migrating from old settings: use-decimal={}", use_decimal);
 
 		container.erase("use-decimal");
 
-		Mod::get()->setSettingValue<int64_t>("decimal-places", useDecimals ? 2 : 0);
+		Mod::get()->setSettingValue<int>("decimal-places", use_decimal ? 2 : 0);
 	}
 }
