@@ -2,9 +2,14 @@
 #include <Geode/modify/PlayLayer.hpp>
 #include <nodes.hpp>
 #include <fmt/core.h>
-#include <string_view>
+#include <array>
 
 using namespace geode::prelude;
+
+constexpr float truncate(float x, int precision) {
+	constexpr std::array powers { 1.0f, 10.0f, 100.0f, 1000.0f, 10000.0f };
+	return std::floorf(x * powers[precision]) / powers[precision];
+}
 
 class RunInfoWidget : public CCNodeRGBA {
 public:
@@ -141,13 +146,9 @@ public:
 			m_was_practice = false;
 		}
 
-		bool decimal = Mod::get()->getSettingValue<bool>("use-decimal");
-
-		if (decimal) {
-			m_info_label->setString(fmt::format("From {:.2f}%", percent).c_str());
-		} else {
-			m_info_label->setString(fmt::format("From {}%", int(percent)).c_str());
-		}
+		int decimal = Mod::get()->getSettingValue<int>("decimal-places");
+		percent = truncate(percent, decimal);
+		m_info_label->setString(fmt::format("From {1:.{0}f}%", decimal, percent).c_str());
 
 		m_top_layout->updateLayout();
 		this->updateLayout();
@@ -159,12 +160,17 @@ class $modify(PlayLayer) {
 	struct Fields {
 		RunInfoWidget* m_widget = nullptr;
 		float m_initial_percent = 0;
+		bool m_show_in_percentage = false;
+		bool m_show_in_progress_bar = false;
 	};
 
 	bool init(GJGameLevel* level, bool unk1, bool unk2) {
 		if (!PlayLayer::init(level, unk1, unk2)) return false;
 
 		if (!Mod::get()->getSettingValue<bool>("enabled")) return true;
+
+		m_fields->m_show_in_percentage = Mod::get()->getSettingValue<bool>("show-in-percentage");
+		m_fields->m_show_in_progress_bar = Mod::get()->getSettingValue<bool>("show-in-progress-bar");
 
 		// removes the testmode label gd creates
 		if (this->getChildrenCount()) {
@@ -195,6 +201,12 @@ class $modify(PlayLayer) {
 		this->update_position();
 
 		return true;
+	}
+
+	void update_labels() {
+		if (!m_fields->m_widget || !Mod::get()->getSettingValue<bool>("enabled")) return;
+		m_fields->m_widget->update_labels(this, m_fields->m_initial_percent);
+		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
 	}
 
 	void update_position() {
@@ -242,10 +254,29 @@ class $modify(PlayLayer) {
 		this->update_position();
 	}
 
-	void update_labels() {
-		if (!m_fields->m_widget || !Mod::get()->getSettingValue<bool>("enabled")) return;
-		m_fields->m_widget->update_labels(this, m_fields->m_initial_percent);
-		m_fields->m_widget->setVisible(m_isPracticeMode || m_isTestMode);
+	void updateProgressbar() {
+		PlayLayer::updateProgressbar();
+
+		if (m_isPlatformer) return;
+		if (!(m_isPracticeMode || m_isTestMode)) return;
+		if (!Mod::get()->getSettingValue<bool>("enabled")) return;
+
+		auto from = m_fields->m_initial_percent;
+		auto to = this->getCurrentPercent();
+
+		if (m_percentageLabel && m_fields->m_show_in_percentage) {
+			int decimal = Mod::get()->getSettingValue<int>("decimal-places");
+			auto from_trunc = truncate(from, decimal);
+			auto to_trunc = truncate(to, decimal);
+			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, from_trunc, to_trunc).c_str());
+		}
+
+		if (m_progressFill && m_fields->m_show_in_progress_bar) {
+			float x = from / 100.0f * m_progressWidth;
+			float width = (to - from) / 100.0f * m_progressWidth;
+			m_progressFill->setTextureRect({ x, 0.0f, width, m_progressHeight });
+			m_progressFill->setPositionX(2.0f + x);
+		}
 	}
 };
 
@@ -261,5 +292,13 @@ $on_mod(Loaded) {
 		container.erase("position-left");
 
 		Mod::get()->setSettingValue<std::string>("position", top ? (left ? "Top Left" : "Top Right") : (left ? "Bottom Left" : "Bottom Right"));
+	}
+	if (container.contains("use-decimal")) {
+		auto use_decimal = container["use-decimal"].asBool().unwrapOr(false);
+		log::debug("Migrating from old settings: use-decimal={}", use_decimal);
+
+		container.erase("use-decimal");
+
+		Mod::get()->setSettingValue<int>("decimal-places", use_decimal ? 2 : 0);
 	}
 }
