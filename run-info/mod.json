@@ -1,12 +1,12 @@
 {
-	"geode": "4.3.1",
+	"geode": "4.6.2",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074",
 		"mac": "2.2074",
 		"ios": "2.2074"
 	},
-	"version": "2.0.1",
+	"version": "2.1.0",
 	"id": "mat.run-info",
 	"name": "Run Info",
 	"developer": "mat",
@@ -18,11 +18,20 @@
 			"default": true,
 			"description": "Enable the mod"
 		},
-		"use-decimal": {
+		"decimal-places": {
 			"name": "Percentage decimals",
-			"type": "bool",
-			"default": false,
-			"description": "Use decimal percentage for level progress"
+			"description": "Amount of decimal places used for level progress percentage",
+			"type": "int",
+			"default": 0,
+			"min": 0,
+			"max": 4,
+			"control": {
+				"arrows": true,
+				"arrow-step": 1,
+				"big-arrows": false,
+				"slider": false,
+				"input": false
+			}
 		},
 		"position": {
 			"name": "Position",
@@ -57,6 +66,18 @@
 			"type": "bool",
 			"default": true,
 			"description": "Shows from which % the current run is from"
+		},
+		"show-in-percentage": {
+			"name": "Show in percentage",
+			"type": "bool",
+			"default": false,
+			"description": "Shows the current run in the main \"x%\" text at the top, e.g. \"3-57%\""
+		},
+		"show-in-progress-bar": {
+			"name": "Show in progress bar",
+			"type": "bool",
+			"default": false,
+			"description": "Shows the starting % of the current run in the progress bar"
 		},
 		"use-start-pos": {
 			"name": "Use startpos icon",

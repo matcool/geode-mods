@@ -1,3 +1,9 @@
+## 2.1.0
+- Add option for specific amount of decimal places
+- Add option to show run in progress bar percentage
+- Add option to show run in progress bar visually
+  - Thanks cgytrus for all these new features!
+
 ## 2.0.1
 - Fix opacity not being applied to icon
 
