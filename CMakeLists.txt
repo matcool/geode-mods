@@ -18,7 +18,7 @@ endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
-CPMAddPackage("gh:Kingminer7/uibuilder#51c5571")
+CPMAddPackage("gh:camila314/uibuilder#04d0075")
 add_subdirectory(nodes)
 
 if (WIN32)
