@@ -6,7 +6,7 @@ using namespace geode::prelude;
 class $modify(EditorUI) {
 	void scrollWheel(float y, float x) override {
 		auto kb = CCDirector::sharedDirector()->getKeyboardDispatcher();
-		if (kb->getControlKeyPressed()) {
+		if (kb->getControlKeyPressed() GEODE_MACOS(|| kb->getCommandKeyPressed())) {
 			auto zoom = m_editorLayer->m_objectLayer->getScale();
 			const float mult = 0.015f * Mod::get()->getSettingValue<double>("zoom-mult");
 			zoom = std::max(0.05, zoom * std::pow(2.7, y * -mult));
