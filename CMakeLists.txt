@@ -18,7 +18,7 @@ endif()
 
 add_subdirectory($ENV{GEODE_SDK} ${CMAKE_CURRENT_BINARY_DIR}/geode)
 
-CPMAddPackage("gh:camila314/uibuilder#3d10e3d")
+CPMAddPackage("gh:camila314/uibuilder#04d0075")
 add_subdirectory(nodes)
 
 if (WIN32)
@@ -32,8 +32,7 @@ endif()
 
 add_subdirectory(run-info)
 
-# TODO: macos still sucks
-if (NOT APPLE)
+# if (NOT APPLE)
 
 add_subdirectory(scroll-zoom)
 
@@ -43,4 +42,4 @@ add_subdirectory(reference-image)
 # add_subdirectory(song-search)
 add_subdirectory(song-preview)
 
-endif()
+# endif()
