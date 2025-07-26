@@ -1,3 +1,6 @@
+## 2.1.1
+- Fix progress bar not resetting when exiting practice mode
+
 ## 2.1.0
 - Add option for specific amount of decimal places
 - Add option to show run in progress bar percentage

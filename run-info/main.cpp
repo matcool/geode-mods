@@ -162,6 +162,7 @@ class $modify(PlayLayer) {
 		float m_initial_percent = 0;
 		bool m_show_in_percentage = false;
 		bool m_show_in_progress_bar = false;
+		bool m_has_edited_progress_sprite = false;
 	};
 
 	bool init(GJGameLevel* level, bool unk1, bool unk2) {
@@ -257,9 +258,18 @@ class $modify(PlayLayer) {
 	void updateProgressbar() {
 		PlayLayer::updateProgressbar();
 
-		if (m_isPlatformer) return;
-		if (!(m_isPracticeMode || m_isTestMode)) return;
-		if (!Mod::get()->getSettingValue<bool>("enabled")) return;
+		bool exit = m_isPlatformer;
+		exit = exit || !(m_isPracticeMode || m_isTestMode);
+		exit = exit || !Mod::get()->getSettingValue<bool>("enabled");
+		if (exit) {
+			if (m_fields->m_has_edited_progress_sprite) {
+				if (m_progressFill) {
+					m_progressFill->setPositionX(2.f);
+				}
+				m_fields->m_has_edited_progress_sprite = false;
+			}
+			return;
+		}
 
 		auto from = m_fields->m_initial_percent;
 		auto to = this->getCurrentPercent();
@@ -271,11 +281,17 @@ class $modify(PlayLayer) {
 			m_percentageLabel->setString(fmt::format("{1:.{0}f}-{2:.{0}f}%", decimal, from_trunc, to_trunc).c_str());
 		}
 
-		if (m_progressFill && m_fields->m_show_in_progress_bar) {
-			float x = from / 100.0f * m_progressWidth;
-			float width = (to - from) / 100.0f * m_progressWidth;
-			m_progressFill->setTextureRect({ x, 0.0f, width, m_progressHeight });
-			m_progressFill->setPositionX(2.0f + x);
+		if (m_progressFill) {
+			if (m_fields->m_show_in_progress_bar) {
+				float x = from / 100.0f * m_progressWidth;
+				float width = (to - from) / 100.0f * m_progressWidth;
+				m_progressFill->setTextureRect({ x, 0.0f, width, m_progressHeight });
+				m_progressFill->setPositionX(2.0f + x);
+				m_fields->m_has_edited_progress_sprite = true;
+			} else if (m_fields->m_has_edited_progress_sprite) {
+				m_progressFill->setPositionX(2.f);
+				m_fields->m_has_edited_progress_sprite = false;
+			}
 		}
 	}
 };
