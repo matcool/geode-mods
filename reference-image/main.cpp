@@ -31,12 +31,13 @@ class $modify(MyEditorUI, EditorUI) {
 					path = newPath;
 				}
 				#endif
-				auto* sprite = CCSprite::create(path.string().c_str());
-				if (sprite || !sprite->getUserObject("geode.texture-loader/fallback")) {
+				auto* sprite = CCSprite::create(geode::utils::string::pathToString(path).c_str());
+				if (sprite && !sprite->getUserObject("geode.texture-loader/fallback")) {
 					m_fields->m_sprite = sprite;
 					m_editorLayer->m_objectLayer->addChild(sprite);
 				} else {
-					FLAlertLayer::create("Error", "Invalid image", "OK")->show();
+					object->setVisible(true);
+					FLAlertLayer::create("Error", "Failed to load image", "OK")->show();
 				}
 			});
 		} else {
@@ -61,6 +62,9 @@ class $modify(MyEditorUI, EditorUI) {
 			sprite->setRotation(object->getRotation());
 
 			sprite->setOpacity(object->getOpacity());
+			sprite->setColor(object->m_isSelected ? ccc3(0, 255, 0) : ccc3(255, 255, 255));
+			object->setVisible(false);
+
 			auto* batch = object->getParent();
 			if (batch) {
 				sprite->setZOrder(batch->getZOrder() - 1);
