@@ -61,6 +61,8 @@ jobs:
       - name: Publish to index
         if: ${{ inputs.publish }}
         run: |
+          # wait a little for the release to be properly up
+          sleep 10
           geode index login --token ${{ secrets.GEODE_TOKEN }}
           geode index mods update ${{ fromJSON(steps.create_release.outputs.assets)[0].browser_download_url }}
 
