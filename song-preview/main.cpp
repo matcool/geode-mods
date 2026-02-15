@@ -214,8 +214,9 @@ protected:
 		m_sampleListener.spawn(std::move(sampleFuture), [this](SampleInfo::SampleFuture::Output res) {
 			if (GEODE_UNWRAP_IF_OK(samples, res)) {
 				this->drawWaveform(samples);
+			} else {
+				FLAlertLayer::create("Error", "Failed to load song information", "OK")->show();
 			}
-			// TODO: error
 		});
 
 		m_drawNode = CCNode::create();

@@ -3,7 +3,7 @@
 	"gd": {
 		"win": "*"
 	},
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"id": "mat.draw-divide",
 	"name": "Draw divide",
 	"developers": ["zmx", "mat"],

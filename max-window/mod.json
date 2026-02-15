@@ -3,7 +3,7 @@
 	"gd": {
 		"win": "2.2081"
 	},
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"id": "mat.max-window",
 	"name": "Window Resize",
 	"developer": "mat",

@@ -6,11 +6,11 @@
 		"mac": "2.2081",
 		"ios": "2.2081"
 	},
-	"version": "v1.2.1",
+	"version": "v1.2.2",
 	"id": "mat.circle-tool",
 	"name": "Circle Tool",
 	"developer": "mat",
-	"description": "An editor tool to duplicate and rotate objects.",
+	"description": "Editor tool to duplicate and rotate objects",
 	"tags": [
 		"offline",
 		"editor",
