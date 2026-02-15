@@ -14,32 +14,37 @@ class $modify(MyEditorUI, EditorUI) {
 		if (this->getSelectedObjects()->count() == 1) {
 			auto* object = CCArrayExt<GameObject*>(this->getSelectedObjects())[0];
 			m_fields->m_object = object;
-			utils::file::pick(file::PickMode::OpenFile, {}).listen([this, object](Result<std::filesystem::path>* result) {
-				if (!*result) return;
-				auto path = result->unwrap();
-				if (m_fields->m_sprite) {
-					m_fields->m_sprite->removeFromParent();
-					m_fields->m_sprite = nullptr;
+			geode::async::spawn(
+				utils::file::pick(file::PickMode::OpenFile, {}),
+				[this, object](Result<std::optional<std::filesystem::path>> result) {
+					auto opt = std::move(result).unwrapOrDefault();
+					if (!opt) return;
+					auto path = std::move(opt).value();
+
+					if (m_fields->m_sprite) {
+						m_fields->m_sprite->removeFromParent();
+						m_fields->m_sprite = nullptr;
+					}
+					#ifdef GEODE_IS_WINDOWS
+					try {
+						(void) path.string();
+					} catch (...) {
+						// copy file to mod temp dir, which is guaranteed to be within the codepage
+						auto newPath = Mod::get()->getTempDir() / ("temp_ref_img"s + path.extension().string());
+						std::filesystem::copy_file(path, newPath, std::filesystem::copy_options::overwrite_existing);
+						path = newPath;
+					}
+					#endif
+					auto* sprite = CCSprite::create(geode::utils::string::pathToString(path).c_str());
+					if (sprite && !sprite->getUserObject("geode.texture-loader/fallback")) {
+						m_fields->m_sprite = sprite;
+						m_editorLayer->m_objectLayer->addChild(sprite);
+					} else {
+						object->setVisible(true);
+						FLAlertLayer::create("Error", "Failed to load image", "OK")->show();
+					}
 				}
-				#ifdef GEODE_IS_WINDOWS
-				try {
-					(void) path.string();
-				} catch (...) {
-					// copy file to mod temp dir, which is guaranteed to be within the codepage
-					auto newPath = Mod::get()->getTempDir() / ("temp_ref_img"s + path.extension().string());
-					std::filesystem::copy_file(path, newPath, std::filesystem::copy_options::overwrite_existing);
-					path = newPath;
-				}
-				#endif
-				auto* sprite = CCSprite::create(geode::utils::string::pathToString(path).c_str());
-				if (sprite && !sprite->getUserObject("geode.texture-loader/fallback")) {
-					m_fields->m_sprite = sprite;
-					m_editorLayer->m_objectLayer->addChild(sprite);
-				} else {
-					object->setVisible(true);
-					FLAlertLayer::create("Error", "Failed to load image", "OK")->show();
-				}
-			});
+			);
 		} else {
 			FLAlertLayer::create("Info", "You must select exactly 1 object", "OK")->show();
 		}

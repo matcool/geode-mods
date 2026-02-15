@@ -85,7 +85,7 @@ class ImageAreaSelectLayer : public FLAlertLayer {
 		clip->setAlphaThreshold(0.0);
 		clip->setInverted(true);
 		m_mainLayer->addChild(clip);
-		
+
 		return true;
 	}
 
@@ -100,15 +100,15 @@ class ImageAreaSelectLayer : public FLAlertLayer {
 		m_stencil->drawPolygon(verts, 4, {1, 1, 1, 1}, 0, {0, 0, 0, 0});
 	}
 
-	virtual void ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent) {
+	void ccTouchMoved(CCTouch *pTouch, CCEvent *pEvent) override {
 		FLAlertLayer::ccTouchMoved(pTouch, pEvent);
 		m_start_pos = pTouch->getStartLocation();
 		m_end_pos = pTouch->getLocation();
 		update_stencil();
 	}
 
-	virtual void keyDown(enumKeyCodes key) {
-		FLAlertLayer::keyDown(key);
+	void keyDown(enumKeyCodes key, double ts) override {
+		FLAlertLayer::keyDown(key, ts);
 		if (key == enumKeyCodes::KEY_Enter) {
 			auto xf = (m_start_pos.x - m_sprite_rect.origin.x) / m_sprite_rect.size.width;
 			auto yf = (m_start_pos.y - m_sprite_rect.origin.y) / m_sprite_rect.size.height;
@@ -142,7 +142,7 @@ public:
 
 #include <Geode/modify/CCKeyboardDispatcher.hpp>
 class $modify(CCKeyboardDispatcher) {
-	bool dispatchKeyboardMSG(enumKeyCodes key, bool down, bool repeat) {
+	bool dispatchKeyboardMSG(enumKeyCodes key, bool down, bool repeat, double ts) {
 		if (down && key == enumKeyCodes::KEY_F2) {
 			auto director = CCDirector::sharedDirector();
 			auto winSize = director->getWinSize();
@@ -159,6 +159,6 @@ class $modify(CCKeyboardDispatcher) {
 				copy_screenshot(std::move(data), captureSize);
 			}
 		}
-		return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down, repeat);
+		return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down, repeat, ts);
 	}
 };

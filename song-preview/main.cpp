@@ -1,17 +1,18 @@
 #include <Geode/Geode.hpp>
-#include <unordered_map>
 #include <UIBuilder.hpp>
 #include <span>
 #include <cstdio>
+#include <arc/future/UtilPollables.hpp>
 
 using namespace geode::prelude;
 using uibuilder::Build;
 
 struct SampleInfo {
 	std::vector<float> samples;
-	using SampleTask = Task<std::vector<float>>;
 
-	static std::pair<Task<std::vector<float>>, float> fromFile(std::string_view songPath, int targetWidth) {
+	using SampleFuture = arc::Future<Result<std::vector<float>>>;
+
+	static std::pair<SampleFuture, float> fromFile(std::string_view songPath, int targetWidth) {
 		auto* engine = FMODAudioEngine::sharedEngine();
 
 		FMOD::Sound* sound;
@@ -27,7 +28,7 @@ struct SampleInfo {
 		}
 		float songLength = static_cast<float>(lengthMilliseconds) / 1000.f;
 
-		return std::make_pair(SampleTask::run([sound, targetWidth](auto, auto hasBeenCancelled) -> SampleTask::Result {
+		auto future = [sound, targetWidth](this auto self) -> SampleFuture {
 			FMOD_SOUND_FORMAT format;
 			int channels;
 			sound->getFormat(nullptr, &format, &channels, nullptr);
@@ -35,7 +36,7 @@ struct SampleInfo {
 			if (format != FMOD_SOUND_FORMAT_PCM8 && format != FMOD_SOUND_FORMAT_PCM16 && format != FMOD_SOUND_FORMAT_PCM24 &&
 				format != FMOD_SOUND_FORMAT_PCM32 && format != FMOD_SOUND_FORMAT_PCMFLOAT) {
 				log::error("Invalid format! {}", int(format));
-				return SampleTask::Cancel();
+				co_return Err("Invalid sound format");
 			}
 
 			unsigned int rawDataSize;
@@ -43,6 +44,7 @@ struct SampleInfo {
 			auto result = sound->getLength(&rawDataSize, FMOD_TIMEUNIT_PCMBYTES);
 			if (result != FMOD_OK) {
 				log::error("Error reading size! {}", int(result));
+				co_return Err("Error reading song length");
 			}
 			sound->getLength(&sampleCount, FMOD_TIMEUNIT_PCM);
 			unsigned int bytesPerSample = rawDataSize / sampleCount;
@@ -52,7 +54,7 @@ struct SampleInfo {
 			if (result != FMOD_OK) {
 				// ignore EOF here because what it reads is good enough, lol
 				// maybe im calculating the size wrong,,, but blame config
-				
+
 				// log::error("Error reading data! {}, only read {} out of {}", int(result), readCount, rawDataSize);
 				// return SampleTask::Cancel();
 			}
@@ -120,9 +122,8 @@ struct SampleInfo {
 			samples.reserve(targetWidth);
 
 			for (float x = 0.f; x < targetWidth; x += 1.f) {
-				if (hasBeenCancelled()) {
-					return SampleTask::Cancel();
-				}
+				co_await arc::coopYield();
+
 				int index = static_cast<int>(x / targetWidth * sampleCount);
 				float sample = 0.f;
 				// how many samples to look at per bar we render
@@ -133,8 +134,10 @@ struct SampleInfo {
 				samples.push_back(sample);
 			}
 
-			return samples;
-		}), songLength);
+			co_return Ok(std::move(samples));
+		}();
+
+		return std::make_pair(std::move(future), std::move(songLength));
 	}
 };
 
@@ -151,14 +154,14 @@ std::pair<CCPoint, bool> testTouchInside(CCTouch* touch, CCNode* node) {
 	return {nodeLocation, inside};
 }
 
-class DetailedAudioPreviewPopup : public geode::Popup<SongInfoObject*, CustomSongWidget*>, public TextInputDelegate {
+class DetailedAudioPreviewPopup : public geode::Popup, public TextInputDelegate {
 protected:
 	int m_songID;
 	CCNode* m_drawNode;
 	CCNode* m_overlayNode;
 	CCNode* m_overlay2Node;
 	CCLabelBMFont* m_timeLabel;
-	float m_songLength;
+	float m_songLength = 0.f;
 	float m_startOffset = 0.f;
 	geode::TextInput* m_startOffsetInput;
 	CCSprite* m_cursorNode;
@@ -168,9 +171,12 @@ protected:
 	CCMenuItemSpriteExtra* m_playButton = nullptr;
 	bool m_isAlreadyChosenSong = false;
 
-	EventListener<SampleInfo::SampleTask> m_sampleTaskListener;
+	async::TaskHolder<typename SampleInfo::SampleFuture::Output> m_sampleListener;
 
-    bool setup(SongInfoObject* songInfo, CustomSongWidget* parent) override {
+    bool init(SongInfoObject* songInfo, CustomSongWidget* parent) {
+		if (!Popup::init(CCDirector::get()->getWinSize().width / 2.f + 75.5f, 240.f))
+			return false;
+
 		this->setID("DetailedAudioPreviewPopup"_spr);
 
 		m_songID = songInfo->m_songID;
@@ -187,7 +193,7 @@ protected:
 
 		auto path = MusicDownloadManager::sharedState()->pathForSong(m_songID);
 		path = CCFileUtils::get()->fullPathForFilename(path.c_str(), false);
-		
+
 		auto* engine = FMODAudioEngine::sharedEngine();
 		engine->stopAllMusic(true);
 		engine->playMusic(path, false, 0.f, 0);
@@ -202,14 +208,15 @@ protected:
 		m_widgetSize = ccp(targetWidth, barHeight);
 		m_barSize = ccp(barWidth, barHeight);
 
-		auto info = SampleInfo::fromFile(path, targetWidth / pixel);
-		m_songLength = info.second;
-		m_sampleTaskListener.bind([this](SampleInfo::SampleTask::Event* event) {
-			if (auto* samples = event->getValue()) {
-				this->drawWaveform(*samples);
+		auto [sampleFuture, songLength] = SampleInfo::fromFile(path, targetWidth / pixel);
+		m_songLength = songLength;
+
+		m_sampleListener.spawn(std::move(sampleFuture), [this](SampleInfo::SampleFuture::Output res) {
+			if (GEODE_UNWRAP_IF_OK(samples, res)) {
+				this->drawWaveform(samples);
 			}
+			// TODO: error
 		});
-		m_sampleTaskListener.setFilter(info.first);
 
 		m_drawNode = CCNode::create();
 		m_drawNode->setAnchorPoint(ccp(0.5f, 0.5f));
@@ -378,7 +385,7 @@ protected:
 
 		m_drawNode->removeFromParent();
 		m_drawNode = drawNode;
-		
+
 		drawNode->setAnchorPoint(ccp(0.5f, 0.5f));
 		drawNode->setContentSize(m_widgetSize);
 		drawNode->drawRect(ccp(0, 0), m_widgetSize, ccc4f(0.f, 0.f, 0.f, 1.f), 0.f, ccc4f(0.f, 0.f, 0.f, 0.f));
@@ -540,7 +547,7 @@ protected:
 public:
     static DetailedAudioPreviewPopup* create(SongInfoObject* info, CustomSongWidget* parent) {
         auto ret = new DetailedAudioPreviewPopup();
-        if (ret->initAnchored(CCDirector::get()->getWinSize().width / 2.f + 75.5f, 240.f, info, parent)) {
+        if (ret->init(info, parent)) {
             ret->autorelease();
         } else {
         	CC_SAFE_DELETE(ret);

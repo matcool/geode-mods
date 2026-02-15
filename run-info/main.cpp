@@ -48,7 +48,6 @@ public:
 			->setCrossAxisOverflow(true)
 			->setAxisAlignment(AxisAlignment::Start)
 		);
-		m_top_layout->getLayout()->ignoreInvisibleChildren(true);
 		m_top_layout->setID("top-layout"_spr);
 
 		m_status_label = make_factory(CCLabelBMFont::create("Practice", "bigFont.fnt"))
@@ -78,7 +77,6 @@ public:
 			->setCrossAxisAlignment(AxisAlignment::Start)
 			->setCrossAxisLineAlignment(AxisAlignment::Start)
 		);
-		this->getLayout()->ignoreInvisibleChildren(true);
 
 		this->update_position(layer, left);
 
@@ -164,6 +162,10 @@ class $modify(PlayLayer) {
 		bool m_show_in_progress_bar = false;
 		bool m_has_edited_progress_sprite = false;
 	};
+
+	static void onModify(auto& self) {
+		(void) self.setHookPriorityAfterPost("PlayLayer::updateProgressbar", "absolllute.megahack");
+	}
 
 	bool init(GJGameLevel* level, bool unk1, bool unk2) {
 		if (!PlayLayer::init(level, unk1, unk2)) return false;

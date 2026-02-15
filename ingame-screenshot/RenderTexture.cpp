@@ -2,7 +2,7 @@
 
 using namespace geode::prelude;
 
-RenderTexture::RenderTexture(unsigned int width, unsigned int height) 
+RenderTexture::RenderTexture(unsigned int width, unsigned int height)
 	: m_width(width),
 	m_height(height)
 {
@@ -71,9 +71,9 @@ void RenderTexture::begin() {
 	m_oldScaleX = glview->m_fScaleX;
 	m_oldScaleY = glview->m_fScaleY;
 	// this is used for scissoring, so otherwise clipping nodes would be wrong
-	glview->m_fScaleX = m_width / director->getWinSize().width;
-	glview->m_fScaleY = m_height / director->getWinSize().height;
-	
+	// glview->m_fScaleX = m_width / director->getWinSize().width;
+	// glview->m_fScaleY = m_height / director->getWinSize().height;
+
 	glViewport(0, 0, m_width, m_height);
     glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	m_fbActive = true;
@@ -92,8 +92,8 @@ void RenderTexture::end() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	m_fbActive = false;
 
-	glview->m_fScaleX = m_oldScaleX;
-	glview->m_fScaleY = m_oldScaleY;
+	// glview->m_fScaleX = m_oldScaleX;
+	// glview->m_fScaleY = m_oldScaleY;
 	director->setViewport();
 }
 
@@ -146,7 +146,7 @@ std::unique_ptr<uint8_t[]> RenderTexture::readDataFromTexture(PixelFormat format
 	if (!m_fbActive) {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_oldFBO);
 	}
-    
+
 	return pixels;
 }
 

@@ -92,13 +92,13 @@ class $modify(CCDirector) {
 };
 
 $on_mod(Loaded) {
-	listenForSettingChanges("enabled", [](bool value) {
+	listenForSettingChanges<bool>("enabled", [](bool value) {
 		g_enabled = value;
 	});
-	listenForSettingChanges("override-visual-fps", [](bool value) {
+	listenForSettingChanges<bool>("override-visual-fps", [](bool value) {
 		g_force_target_fps = value;
 	});
-	listenForSettingChanges("visual-fps", [](int value) {
+	listenForSettingChanges<int>("visual-fps", [](int value) {
 		g_force_fps = value;
 	});
 }
