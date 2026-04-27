@@ -1,3 +1,11 @@
+## Note
+
+The mod [Tinker](mod:alphalaneous.tinker) provides a better and more refined implementation of this same idea:
+
+<mod:alphalaneous.tinker>
+
+This mod will be kept as is, in case you really prefer this one.
+
 # Reference Image
 
 Adds a button to the Edit tab of the editor to anchor a reference image to a selected object.

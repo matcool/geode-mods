@@ -6,11 +6,11 @@
 		"mac": "2.2081",
 		"ios": "2.2081"
 	},
-	"version": "v1.2.1",
+	"version": "v1.2.2",
 	"id": "mat.reference-image",
 	"name": "Reference Image",
 	"developer": "mat",
-	"description": "An editor tool to display a reference image in the editor.",
+	"description": "Editor tool to display a reference image in the editor",
 	"tags": [
 		"offline",
 		"editor",
