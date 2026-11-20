@@ -157,12 +157,19 @@ protected:
 					.anchorPoint(0.f, 0.5f)
 					.scale(0.5f)
 				)
-				.child(Build<geode::TextInput>::create(50.f, "x:xx", "chatFont.fnt")
+				.child(Build<geode::TextInput>::create(CCSize(60.f, 30.f), "x:xx", "chatFont.fnt")
 					.with([this](geode::TextInput* node) {
 						node->setString("0:00");
+						node->setFontScale(0.75f);
+						node->setPadding(ccp(5.0f, 5.0f));
 						node->setFilter("0123456789:.");
 						node->setCallback([this](std::string const& str) {
 							this->onTimeInputChange(str);
+						});
+						node->setFocusCallback([this](TextInput::FocusState state) {
+							if (state == TextInput::FocusState::Unfocused) {
+								this->seekOffsetTo(m_startOffset / m_songLength, true);
+							}
 						});
 					})
 					.store(m_startOffsetInput)
@@ -347,10 +354,6 @@ protected:
 		}
 
 		this->seekOffsetTo(time / m_songLength, false);
-	}
-
-	void textInputClosed(CCTextInputNode* input) override {
-		this->seekOffsetTo(m_startOffset / m_songLength);
 	}
 
 public:
