@@ -167,8 +167,8 @@ class $modify(PlayLayer) {
 		(void) self.setHookPriorityAfterPost("PlayLayer::updateProgressbar", "absolllute.megahack");
 	}
 
-	bool init(GJGameLevel* level, bool unk1, bool unk2) {
-		if (!PlayLayer::init(level, unk1, unk2)) return false;
+	bool init(GJGameLevel* level, bool unk1) {
+		if (!PlayLayer::init(level, unk1)) return false;
 
 		if (!Mod::get()->getSettingValue<bool>("enabled")) return true;
 

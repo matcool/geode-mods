@@ -152,7 +152,7 @@ public:
 		for (float i = 1; i * m_step < m_angle; ++i) {
 			editor_ui->onDuplicate(nullptr);
 			auto selected = editor_ui->getSelectedObjects();
-			editor_ui->rotateObjects(selected, m_step, {0.f, 0.f});
+			editor_ui->rotateObjects(selected, m_step, {0.f, 0.f}, false);
 
 			const float angle = i * m_step;
 

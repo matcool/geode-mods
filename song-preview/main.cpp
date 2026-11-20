@@ -154,7 +154,7 @@ std::pair<CCPoint, bool> testTouchInside(CCTouch* touch, CCNode* node) {
 	return {nodeLocation, inside};
 }
 
-class DetailedAudioPreviewPopup : public geode::Popup, public TextInputDelegate {
+class DetailedAudioPreviewPopup : public geode::Popup {
 protected:
 	int m_songID;
 	CCNode* m_drawNode;
@@ -316,7 +316,9 @@ protected:
 					.with([this](geode::TextInput* node) {
 						node->setString("0:00");
 						node->setFilter("0123456789:.");
-						node->setDelegate(this);
+						node->setCallback([this](std::string const& str) {
+							this->onTimeInputChange(str);
+						});
 					})
 					.store(m_startOffsetInput)
 				)
@@ -524,9 +526,8 @@ protected:
 		Popup::onClose(obj);
 	}
 
-    void textChanged(CCTextInputNode* input) override {
+    void onTimeInputChange(std::string const& str) {
 		// try to parse it, ignore if it fails
-		auto str = input->getString();
 		int minutes = 0;
 		float seconds = 0;
 		float time = 0.f;
