@@ -17,5 +17,13 @@
 	],
 	"links": {
 		"source": "https://github.com/matcool/geode-mods"
+	},
+	"settings": {
+		"keybind": {
+			"type": "keybind",
+			"default": "F2",
+			"name": "Screenshot",
+			"category": "universal"
+		}
 	}
 }

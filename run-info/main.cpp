@@ -161,6 +161,7 @@ class $modify(PlayLayer) {
 		bool m_show_in_percentage = false;
 		bool m_show_in_progress_bar = false;
 		bool m_has_edited_progress_sprite = false;
+		bool m_was_practice_mode = false;
 	};
 
 	static void onModify(auto& self) {
@@ -199,6 +200,8 @@ class $modify(PlayLayer) {
 		m_fields->m_widget->setOpacity(Mod::get()->getSettingValue<int>("opacity"));
 		m_fields->m_widget->setScale(Mod::get()->getSettingValue<float>("scale"));
 		m_fields->m_widget->setColor(Mod::get()->getSettingValue<ccColor3B>("color"));
+
+		m_fields->m_was_practice_mode = m_isPracticeMode;
 
 		this->update_labels();
 		this->update_position();
@@ -251,14 +254,21 @@ class $modify(PlayLayer) {
 		this->update_position();
 	}
 
-	void togglePracticeMode(bool toggle) {
-		PlayLayer::togglePracticeMode(toggle);
-		this->update_labels();
-		this->update_position();
-	}
+	// inlined :(
+	// void togglePracticeMode(bool toggle) {
+	// 	PlayLayer::togglePracticeMode(toggle);
+	// 	this->update_labels();
+	// 	this->update_position();
+	// }
 
 	void updateProgressbar() {
 		PlayLayer::updateProgressbar();
+
+		if (m_fields->m_was_practice_mode != m_isPracticeMode) {
+			this->update_labels();
+			this->update_position();
+			m_fields->m_was_practice_mode = m_isPracticeMode;
+		}
 
 		bool exit = m_isPlatformer;
 		exit = exit || !(m_isPracticeMode || m_isTestMode);

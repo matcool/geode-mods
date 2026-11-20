@@ -140,14 +140,12 @@ public:
 	}
 };
 
-#include <Geode/modify/CCKeyboardDispatcher.hpp>
-class $modify(CCKeyboardDispatcher) {
-	bool dispatchKeyboardMSG(enumKeyCodes key, bool down, bool repeat, double ts) {
-		if (down && key == enumKeyCodes::KEY_F2) {
+$on_game(Loaded) {
+	listenForKeybindSettingPresses("keybind", [](Keybind const& keybind, bool down, bool repeat, double timestamp) {
+        if (down && !repeat) {
 			auto director = CCDirector::sharedDirector();
 			auto winSize = director->getWinSize();
 			auto scene = director->getRunningScene();
-
 
 			auto captureSize = CCSize(1920, 1080);
 			RenderTexture texture(captureSize.width, captureSize.height);
@@ -157,8 +155,8 @@ class $modify(CCKeyboardDispatcher) {
 				ImageAreaSelectLayer::create(texture.intoTexture(), std::move(data))->show();
 			} else {
 				copy_screenshot(std::move(data), captureSize);
+				FMODAudioEngine::get()->playEffect("door01.ogg", 3.f, 1.f, 1.f);
 			}
-		}
-		return CCKeyboardDispatcher::dispatchKeyboardMSG(key, down, repeat, ts);
-	}
-};
+        }
+    });
+}
