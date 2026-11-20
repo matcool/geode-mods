@@ -1,3 +1,6 @@
+## 1.2.4
+- Port to 2.2091
+
 ## 1.2.3
 - Remake the popup using Geode's classes, preventing a touch handler leak
   - This fixes an issue with the Better Touch Prio mod
