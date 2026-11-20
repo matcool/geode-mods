@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <arc/future/UtilPollables.hpp>
 #include "samples.hpp"
+#include "waveform.hpp"
 
 using namespace geode::prelude;
 using uibuilder::Build;
@@ -24,9 +25,6 @@ std::pair<CCPoint, bool> testTouchInside(CCTouch* touch, CCNode* node) {
 class DetailedAudioPreviewPopup : public geode::Popup {
 protected:
 	int m_songID;
-	CCNode* m_drawNode;
-	CCNode* m_overlayNode;
-	CCNode* m_overlay2Node;
 	CCLabelBMFont* m_timeLabel;
 	float m_songLength = 0.f;
 	float m_startOffset = 0.f;
@@ -37,10 +35,11 @@ protected:
 	CustomSongWidget* m_parentWidget = nullptr;
 	CCMenuItemSpriteExtra* m_playButton = nullptr;
 	bool m_isAlreadyChosenSong = false;
+	WaveformNode* m_waveformNode;
 
 	async::TaskHolder<typename SampleInfo::SampleFuture::Output> m_sampleListener;
 
-    bool init(SongInfoObject* songInfo, CustomSongWidget* parent) {
+	bool init(SongInfoObject* songInfo, CustomSongWidget* parent) {
 		if (!Popup::init(CCDirector::get()->getWinSize().width / 2.f + 75.5f, 240.f))
 			return false;
 
@@ -56,7 +55,7 @@ protected:
 			}
 		}
 
-        auto winSize = CCDirector::sharedDirector()->getWinSize();
+		auto winSize = CCDirector::sharedDirector()->getWinSize();
 
 		auto path = MusicDownloadManager::sharedState()->pathForSong(m_songID);
 		path = CCFileUtils::get()->fullPathForFilename(path.c_str(), false);
@@ -86,28 +85,7 @@ protected:
 			}
 		});
 
-		m_drawNode = CCNode::create();
-		m_drawNode->setAnchorPoint(ccp(0.5f, 0.5f));
-		m_drawNode->setContentSize(m_widgetSize);
-
-		const auto unplayedColor = geode::cocos::cc4bFromHexString("ffad31", false, true).unwrap();
-		const auto playedColor = geode::cocos::cc4bFromHexString("ff", false, true).unwrap();
-
-		auto* overlay = CCLayerColor::create(playedColor, targetWidth, barHeight + 1);
-		overlay->setBlendFunc({GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA});
-		overlay->ignoreAnchorPointForPosition(false);
-		overlay->setAnchorPoint(ccp(0.0f, 0.5f));
-		overlay->setZOrder(10);
-		m_drawNode->addChildAtPosition(overlay, Anchor::Center, ccp(-targetWidth / 2.f, 0.f));
-		m_overlayNode = overlay;
-
-		overlay = CCLayerColor::create(unplayedColor, targetWidth, barHeight + 1);
-		overlay->setBlendFunc({GL_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA});
-		overlay->ignoreAnchorPointForPosition(false);
-		overlay->setAnchorPoint(ccp(1.0f, 0.5f));
-		overlay->setZOrder(10);
-		m_drawNode->addChildAtPosition(overlay, Anchor::Center, ccp(targetWidth / 2.f, 0.f));
-		m_overlay2Node = overlay;
+		m_waveformNode = WaveformNode::create(m_widgetSize);
 
 		this->schedule(schedule_selector(DetailedAudioPreviewPopup::update), 1.f / 60.f);
 
@@ -136,7 +114,7 @@ protected:
 				)
 				.updateLayout()
 			)
-			.child(m_drawNode)
+			.child(m_waveformNode)
 			.child(Build<CCNode>::create()
 				.contentSize({10.f, 2.f})
 			)
@@ -236,48 +214,11 @@ protected:
 			.updateLayout()
 		;
 
-        return true;
-    }
+		return true;
+	}
 
 	void drawWaveform(const std::span<float> samples) {
-		auto* parent = m_drawNode->getParent();
-
-		auto* drawNode = CCDrawNode::create();
-		drawNode->setZOrder(-1);
-		parent->addChild(drawNode);
-		// transfer the overlay nodes
-		for (auto* child : CCArrayExt<CCNode*>(m_drawNode->getChildren())) {
-			child->retain();
-			child->removeFromParent();
-			drawNode->addChild(child);
-			child->release();
-		}
-
-		m_drawNode->removeFromParent();
-		m_drawNode = drawNode;
-
-		drawNode->setAnchorPoint(ccp(0.5f, 0.5f));
-		drawNode->setContentSize(m_widgetSize);
-		drawNode->drawRect(ccp(0, 0), m_widgetSize, ccc4f(0.f, 0.f, 0.f, 1.f), 0.f, ccc4f(0.f, 0.f, 0.f, 0.f));
-		for (float x = 0.f; x < m_widgetSize.width; x += m_barSize.width) {
-			int index = static_cast<int>(x / m_widgetSize.width * samples.size());
-			float height = samples[index] * m_barSize.height;
-			auto tl = ccp(x, (m_barSize.height + height) / 2.f);
-			auto br = ccp(x + m_barSize.width, (m_barSize.height - height) / 2.f);
-			auto tr = ccp(br.x, tl.y);
-			auto bl = ccp(tl.x, br.y);
-			CCPoint points[] = {tl, tr, br, bl};
-			drawNode->drawPolygon(points, 4, ccc4f(1.f, 1.f, 1.f, 0.f), 0.f, ccc4f(0.f, 0.f, 1.f, 1.f));
-			// TODO: properly draw a 2 pixel rectangle because cocos is stupid
-			// and forces some stupid outline
-			points[0].x += m_barSize.width;
-			points[1].x += m_barSize.width;
-			points[2].x += m_barSize.width;
-			points[3].x += m_barSize.width;
-			drawNode->drawPolygon(points, 4, ccc4f(0.f, 0.f, 0.f, 1.f), 0.f, ccc4f(0.f, 0.f, 1.f, 1.f));
-		}
-
-		parent->updateLayout();
+		m_waveformNode->drawSamples(samples);
 	}
 
 	bool m_seekingOffset = false;
@@ -292,7 +233,7 @@ protected:
 	}
 
 	bool ccTouchBegan(CCTouch* touch, CCEvent* event) override {
-		if (auto [touchLocation, inside] = testTouchInside(touch, m_drawNode); inside) {
+		if (auto [touchLocation, inside] = testTouchInside(touch, m_waveformNode); inside) {
 			m_seekToRequested = true;
 			m_seekToPercent = touchLocation.x / m_widgetSize.width;
 			m_seeking = true;
@@ -300,7 +241,7 @@ protected:
 			return true;
 		} else if (auto [_, inside] = testTouchInside(touch, m_cursorNode); inside) {
 			m_seekingOffset = true;
-			auto [touchLocation, _2] = testTouchInside(touch, m_drawNode);
+			auto [touchLocation, _2] = testTouchInside(touch, m_waveformNode);
 			this->seekOffsetTo(touchLocation.x / m_widgetSize.width);
 		}
 		return Popup::ccTouchBegan(touch, event);
@@ -309,12 +250,12 @@ protected:
 	void ccTouchMoved(CCTouch* touch, CCEvent* event) override {
 		if (m_seeking) {
 			auto location = touch->getLocation();
-			auto nodeLocation = m_drawNode->convertToNodeSpace(location);
-			auto size = m_drawNode->getContentSize();
+			auto nodeLocation = m_waveformNode->convertToNodeSpace(location);
+			auto size = m_waveformNode->getContentSize();
 			m_seekToPercent = std::clamp(nodeLocation.x / size.width, 0.f, 1.f);
 			this->visualSeekTo(m_seekToPercent);
 		} else if (m_seekingOffset) {
-			auto [touchLocation, _] = testTouchInside(touch, m_drawNode);
+			auto [touchLocation, _] = testTouchInside(touch, m_waveformNode);
 			this->seekOffsetTo(touchLocation.x / m_widgetSize.width);
 		} else {
 			Popup::ccTouchMoved(touch, event);
@@ -336,8 +277,7 @@ protected:
 	bool m_seekToRequested = false;
 
 	void visualSeekTo(float percent) {
-		m_overlayNode->setScaleX(percent);
-		m_overlay2Node->setScaleX(1.f - percent);
+		m_waveformNode->setPercent(percent);
 		m_timeLabel->setString(fmt::format("{} / {}", formatSeconds(percent * m_songLength), formatSeconds(m_songLength)).c_str());
 	}
 
@@ -393,7 +333,7 @@ protected:
 		Popup::onClose(obj);
 	}
 
-    void onTimeInputChange(std::string const& str) {
+	void onTimeInputChange(std::string const& str) {
 		// try to parse it, ignore if it fails
 		int minutes = 0;
 		float seconds = 0;
@@ -409,20 +349,20 @@ protected:
 		this->seekOffsetTo(time / m_songLength, false);
 	}
 
-    void textInputClosed(CCTextInputNode* input) override {
+	void textInputClosed(CCTextInputNode* input) override {
 		this->seekOffsetTo(m_startOffset / m_songLength);
 	}
 
 public:
-    static DetailedAudioPreviewPopup* create(SongInfoObject* info, CustomSongWidget* parent) {
-        auto ret = new DetailedAudioPreviewPopup();
-        if (ret->init(info, parent)) {
-            ret->autorelease();
-        } else {
-        	CC_SAFE_DELETE(ret);
+	static DetailedAudioPreviewPopup* create(SongInfoObject* info, CustomSongWidget* parent) {
+		auto ret = new DetailedAudioPreviewPopup();
+		if (ret->init(info, parent)) {
+			ret->autorelease();
+		} else {
+			CC_SAFE_DELETE(ret);
 		}
 		return ret;
-    }
+	}
 };
 
 #include <Geode/modify/CustomSongWidget.hpp>
