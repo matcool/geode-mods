@@ -208,13 +208,18 @@ class $modify(MyEditorUI, EditorUI) {
 		}
 	}
 
-	void createMoveMenu() {
-		EditorUI::createMoveMenu();
-		auto* btn = this->getSpriteButton("button.png"_spr, menu_selector(MyEditorUI::on_circle_tool), nullptr, 0.9f);
-		m_editButtonBar->m_buttonArray->addObject(btn);
-		auto rows = GameManager::sharedState()->getIntGameVariable("0049");
-		auto cols = GameManager::sharedState()->getIntGameVariable("0050");
-		// TODO: replace with reloadItemsInNormalSize
-		m_editButtonBar->reloadItems(rows, cols);
+	bool init(LevelEditorLayer* layer) {
+		EditorUI::init(layer);
+		auto sprite = EditorButtonSprite::createWithSpriteFrameName(
+			"button.png"_spr,
+			1.f,
+			EditorBaseColor::Aqua
+		);
+		auto btn = geode::Button::createWithNode(sprite, [this](auto*) {
+			this->on_circle_tool(nullptr);
+		});
+		btn->setPosition(50, 240);
+		this->addChild(btn);
+		return true;
 	}
 };
