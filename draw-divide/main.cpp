@@ -101,4 +101,7 @@ $on_mod(Loaded) {
 	listenForSettingChanges<int>("visual-fps", [](int value) {
 		g_force_fps = value;
 	});
+	g_enabled = Mod::get()->getSettingValue<bool>("enabled");
+	g_force_target_fps = Mod::get()->getSettingValue<bool>("override-visual-fps");
+	g_force_fps = Mod::get()->getSettingValue<int>("visual-fps");
 }
