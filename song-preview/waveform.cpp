@@ -18,14 +18,15 @@ static const std::string vertShader = R"(
 	}
 )";
 
-#define RELOAD_SHADERS 1
+#define RELOAD_SHADERS 0
+
 char fragShader[] = {
-	#embed "shader.fsh"
+	#embed "shader.glsl"
 };
 
 std::string getFragShader() {
 #if RELOAD_SHADERS
-	return geode::utils::file::readString(asp::fs::Path(__FILE__).parent().value() / "shader.fsh").unwrap();
+	return geode::utils::file::readString(asp::fs::Path(__FILE__).parent().value() / "shader.glsl").unwrap();
 #else
 	return std::string(fragShader, sizeof(fragShader));
 #endif
@@ -53,6 +54,7 @@ CCGLProgram* getShader() {
 	auto* shader = cache->programForKey("waveform"_spr);
 	if (shader == nullptr) {
 		shader = makeShader();
+		if (!shader) return nullptr;
 		cache->addProgram(shader, "waveform"_spr);
 	}
 	return shader;
@@ -70,32 +72,28 @@ bool WaveformNode::init(CCSize size) {
 	float pixel = frameSize.width / winSize.width;
 	auto factor = CCDirector::get()->getContentScaleFactor();
 
-	auto textureSize = CCSize(int(size.width * pixel), int(size.height * pixel));
+	auto textureSize = CCSize(int(size.width * pixel), 1.0f);
 	auto data = std::make_unique<uint8_t[]>(textureSize.width * textureSize.height);
+
+	for (int i = 0; i < textureSize.width; i++) {
+		data[i] = (std::sin(float(i) * 0.05f) * 0.3f + 0.7f) * 255.f;
+	}
 
 	auto* texture = new CCTexture2D();
 	texture->autorelease();
 	texture->initWithData(data.get(), kCCTexture2DPixelFormat_I8, textureSize.width, textureSize.height, textureSize);
 	texture->setAliasTexParameters();
-	m_texture = texture;
-
-	// m_sprite = CCSprite::createWithTexture(texture, CCRect(0.f, 0.f, textureSize.width / factor, size.height * pixel / factor));
-	m_sprite = CCSprite::createWithTexture(texture);
-	m_sprite->setPosition(size / 2.f);
-	// m_sprite->setScale(textureSize.width / (m_sprite->getContentSize().width * pixel));
-	// equivalent:
-	m_sprite->setScale(factor / pixel);
 	auto* shader = getShader();
 	if (shader) {
-		m_sprite->setShaderProgram(shader);
+		texture->setShaderProgram(shader);
 	}
-	this->addChild(m_sprite);
+	m_texture = texture;
 
 	return true;
 }
 
 void WaveformNode::setPercent(float percent) {
-	auto* shader = m_sprite->getShaderProgram();
+	auto* shader = m_texture->getShaderProgram();
 	if (!shader) return;
 	shader->use();
 	shader->setUniformLocationWith1f(shader->getUniformLocationForName("percentage"), percent);
@@ -115,4 +113,14 @@ void WaveformNode::drawSamples(std::span<const float> samples) {
 	// this is fine, the old gl texture is deleted properly
 	m_texture->initWithData(data.get(), kCCTexture2DPixelFormat_I8, textureSize.width, textureSize.height, textureSize);
 	m_texture->setAliasTexParameters();
+	auto* shader = getShader();
+	if (shader) {
+		m_texture->setShaderProgram(shader);
+	}
+}
+
+void WaveformNode::draw() {
+	if (!this->isVisible()) return;
+
+	m_texture->drawInRect(CCRect({}, this->getContentSize()));
 }

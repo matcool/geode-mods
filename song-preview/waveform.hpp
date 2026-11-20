@@ -8,7 +8,6 @@ using namespace geode::prelude;
 class WaveformNode : public CCNode {
 public:
 	Ref<CCTexture2D> m_texture;
-	CCSprite* m_sprite;
 
 	static WaveformNode* create(CCSize size) {
 		auto* node = new WaveformNode();
@@ -19,6 +18,7 @@ public:
 
 	bool init(CCSize size);
 	void setPercent(float);
+	void draw() override;
 
 	void drawSamples(std::span<const float> samples);
 };

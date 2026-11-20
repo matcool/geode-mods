@@ -10,12 +10,6 @@ uniform float percentage;
 void main() {
 	const vec4 unplayColor = vec4(1.00, 0.68, 0.19, 1.0);
 
-	// vec4 tex = texture2D(CC_Texture0, vec2(v_texCoord.x, 0.0));
-	// const float off = 0.01;
-	// float fac = smoothstep(percentage - off, percentage + off, v_texCoord.x);
-	// vec4 color = mix(vec4(1.0), unplayColor, fac);
-	// gl_FragColor = tex * color;
-
 	float height = texture2D(CC_Texture0, vec2(v_texCoord.x, 0.0)).r;
 	float mirrorY = abs(v_texCoord.y * 2.0 - 1.0);
 	float barFactor = step(mirrorY, height);
