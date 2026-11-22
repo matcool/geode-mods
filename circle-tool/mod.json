@@ -28,5 +28,8 @@
 	},
 	"links": {
 		"source": "https://github.com/matcool/geode-mods"
+	},
+	"dependencies": {
+		"alphalaneous.editortab_api": "3.0.0-beta.3"
 	}
 }

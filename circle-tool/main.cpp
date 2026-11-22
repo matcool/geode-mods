@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/EditorUI.hpp>
 #include <nodes.hpp>
+#include <alphalaneous.editortab_api/API.hpp>
 
 using namespace geode;
 using namespace cocos2d;
@@ -209,17 +210,14 @@ class $modify(MyEditorUI, EditorUI) {
 	}
 
 	bool init(LevelEditorLayer* layer) {
-		EditorUI::init(layer);
-		auto sprite = EditorButtonSprite::createWithSpriteFrameName(
-			"button.png"_spr,
-			1.f,
-			EditorBaseColor::Aqua
-		);
-		auto btn = geode::Button::createWithNode(sprite, [this](auto*) {
+		if (!EditorUI::init(layer)) return false;
+
+		auto btn = alpha::editor_tabs::createEditButton(CCSprite::createWithSpriteFrameName("button.png"_spr), 5, [this](auto*) {
 			this->on_circle_tool(nullptr);
 		});
-		btn->setPosition(50, 240);
-		this->addChild(btn);
+
+		alpha::editor_tabs::getMode(alpha::editor_tabs::Edit)->getTab("edit")->getNode()->addItem(btn);
+
 		return true;
 	}
 };
