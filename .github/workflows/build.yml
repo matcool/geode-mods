@@ -27,7 +27,7 @@ jobs:
 
       - name: Build the mod
         continue-on-error: ${{ matrix.config.target == 'macintel' || matrix.config.target == 'macm1' || matrix.config.target == 'ios' || matrix.config.target == 'android32' }}
-        uses: geode-sdk/build-geode-mod-docker@main
+        uses: geode-sdk/build-geode-mod-docker@v1
         with:
           target: ${{ matrix.config.target }}
           upload: true
@@ -41,7 +41,7 @@ jobs:
     needs: build
 
     steps:
-      - uses: geode-sdk/build-geode-mod-docker/merge@main
+      - uses: geode-sdk/build-geode-mod-docker/merge@v1
         with:
           upload: true
 
